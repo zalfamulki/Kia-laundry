@@ -157,6 +157,7 @@
         </h3>
         <p style="font-size:0.875rem; color:var(--text-body); max-width:600px;">
           Pilih <strong>Opsi A (Rekomendasi)</strong> untuk format ringan ZIP berisi XLSX + folder foto pakaian, atau <strong>Opsi B</strong> untuk foto yang tertanam langsung di sel spreadsheet.
+          Setelah export, gunakan <strong>Export &amp; Bersihkan</strong> untuk membebaskan storage foto dari nota yang sudah diarsipkan.
         </p>
       </div>
 
@@ -169,6 +170,11 @@
         <button type="button" class="btn btn-yellow" id="btnExportOpsiB">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>Opsi B: XLSX Foto Tertanam</span>
+        </button>
+
+        <button type="button" class="btn btn-danger" id="btnExportBersihkan" title="Hapus foto dari nota pada periode filter aktif untuk membebaskan storage">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          <span>Export &amp; Bersihkan Foto</span>
         </button>
       </div>
     </div>

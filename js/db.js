@@ -110,6 +110,146 @@ async function generateNextTrxId() {
   return `${prefix}${nextSeq}`;
 }
 
+// ============================================================
+// Task 2 — Purge foto & statistik storage
+// ============================================================
+
+/**
+ * Hapus foto dari pakaian milik nota/transaksi tertentu.
+ * Data teks (jenis, warna, dll.) dan record transaksi TETAP ada.
+ * Simpan marker exportedAt pada transaksi sebagai tanda arsip.
+ * @param {string[]} trxIds - Daftar ID transaksi yang difoto-hapus
+ * @returns {{ fotoCount: number, estimasiMb: number }}
+ */
+async function purgeFotoNota(trxIds) {
+  if (!trxIds || trxIds.length === 0) return { fotoCount: 0, estimasiMb: 0 };
+
+  const pakaianList = await db.pakaian
+    .where("transaksiId")
+    .anyOf(trxIds)
+    .toArray();
+
+  let fotoCount = 0;
+  let totalBytes = 0;
+
+  for (const p of pakaianList) {
+    let changed = false;
+    const update = {};
+
+    if (p.foto) {
+      // Estimasi ukuran base64: panjang string * 0.75
+      totalBytes += Math.round(p.foto.length * 0.75);
+      update.foto = null;
+      fotoCount++;
+      changed = true;
+    }
+    if (p.fotoThumb) {
+      totalBytes += Math.round(p.fotoThumb.length * 0.75);
+      update.fotoThumb = null;
+      changed = true;
+    }
+
+    if (changed) {
+      update.fotoPurgedAt = new Date().toISOString();
+      await db.pakaian.update(p.id, update);
+    }
+  }
+
+  // Tandai transaksi sebagai telah diarsipkan
+  const now = new Date().toISOString();
+  for (const id of trxIds) {
+    await db.transaksi.update(id, { exportedAt: now });
+  }
+
+  const estimasiMb = (totalBytes / (1024 * 1024)).toFixed(2);
+  return { fotoCount, estimasiMb };
+}
+
+/**
+ * Preview: hitung berapa foto yang akan dihapus oleh purge otomatis.
+ * Kriteria: transaksi berstatus 'diambil' dan tanggal updatedAt / estimasiSelesai
+ * sudah lebih dari `batasHari` hari lalu, serta foto belum di-purge.
+ * @param {number} batasHari
+ * @returns {{ trxIds: string[], fotoCount: number, estimasiMb: number }}
+ */
+async function previewPurgeOld(batasHari = 90) {
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - batasHari);
+  const cutoffStr = cutoff.toISOString();
+
+  const selesaiList = await db.transaksi
+    .where("status")
+    .equals("diambil")
+    .toArray();
+
+  const kandidat = selesaiList.filter((t) => {
+    const ref = t.updatedAt || t.estimasiSelesai || t.tanggalMasuk || "";
+    return ref < cutoffStr;
+  });
+
+  const trxIds = kandidat.map((t) => t.id);
+  if (trxIds.length === 0) return { trxIds: [], fotoCount: 0, estimasiMb: 0 };
+
+  const pakaianList = await db.pakaian
+    .where("transaksiId")
+    .anyOf(trxIds)
+    .toArray();
+
+  let fotoCount = 0;
+  let totalBytes = 0;
+
+  for (const p of pakaianList) {
+    if (p.foto && !p.fotoPurgedAt) {
+      totalBytes += Math.round(p.foto.length * 0.75);
+      fotoCount++;
+    }
+    if (p.fotoThumb && !p.fotoPurgedAt) {
+      totalBytes += Math.round(p.fotoThumb.length * 0.75);
+    }
+  }
+
+  const estimasiMb = (totalBytes / (1024 * 1024)).toFixed(2);
+  return { trxIds, fotoCount, estimasiMb };
+}
+
+/**
+ * Jalankan purge otomatis berdasarkan umur.
+ * Hanya menghapus foto transaksi yang sudah 'diambil' dan melewati batas umur.
+ * @param {number} batasHari
+ * @returns {{ fotoCount: number, estimasiMb: number }}
+ */
+async function purgeOldPhotos(batasHari = 90) {
+  const { trxIds } = await previewPurgeOld(batasHari);
+  if (trxIds.length === 0) return { fotoCount: 0, estimasiMb: 0 };
+  return purgeFotoNota(trxIds);
+}
+
+/**
+ * Statistik foto: berapa item masih punya foto, berapa sudah di-purge.
+ * @returns {{ aktif: number, purged: number, totalBytes: number }}
+ */
+async function getPhotoStats() {
+  const allPkn = await db.pakaian.toArray();
+  let aktif = 0;
+  let purged = 0;
+  let totalBytes = 0;
+
+  for (const p of allPkn) {
+    if (p.foto) {
+      aktif++;
+      totalBytes += Math.round(p.foto.length * 0.75);
+    }
+    if (p.fotoThumb) {
+      totalBytes += Math.round(p.fotoThumb.length * 0.75);
+    }
+    if (p.fotoPurgedAt && !p.foto) purged++;
+  }
+
+  return { aktif, purged, totalBytes };
+}
+
+// ============================================================
+
 // Update / Tambah customer secara otomatis saat transaksi disimpan
 async function upsertCustomer(nama, noHp, alamat = "", totalHarga = 0) {
   if (!noHp) return null;

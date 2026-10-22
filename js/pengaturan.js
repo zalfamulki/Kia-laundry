@@ -30,13 +30,17 @@ async function loadSettingsForm() {
   document.getElementById("cfgHp1").value = appSettings.noHp1 || "085179591769";
   document.getElementById("cfgHp2").value = appSettings.noHp2 || "08112291769";
 
-  // 2. Harga Kiloan
+  // 2. Batas Purge Foto Otomatis (Task 2.2)
+  const cfgPurge = document.getElementById("cfgBatasPurgeHari");
+  if (cfgPurge) cfgPurge.value = appSettings.batasPurgeHari ?? 90;
+
+  // 3. Harga Kiloan
   const h = appSettings.harga || {};
   document.getElementById("cfgHargaCuciSetrika").value = h.cuciSetrika || 9000;
   document.getElementById("cfgHargaCuci").value = h.cuci || 6000;
   document.getElementById("cfgHargaSetrika").value = h.setrika || 5000;
 
-  // 3. Harga Satuan
+  // 4. Harga Satuan
   const s = h.satuan || {};
   document.getElementById("cfgSatKemeja").value = s.kemeja || 7000;
   document.getElementById("cfgSatKaos").value = s.kaos || 5000;
@@ -69,6 +73,7 @@ function setupSettingsEvents() {
         noHp1: document.getElementById("cfgHp1").value.trim(),
         noHp2: document.getElementById("cfgHp2").value.trim(),
         logo: appSettings.logo || "./assets/logo.png",
+        batasPurgeHari: Number(document.getElementById("cfgBatasPurgeHari")?.value) || 90,
         harga: {
           cuciSetrika: Number(document.getElementById("cfgHargaCuciSetrika").value) || 9000,
           cuci: Number(document.getElementById("cfgHargaCuci").value) || 6000,

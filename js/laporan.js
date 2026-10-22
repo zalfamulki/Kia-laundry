@@ -543,4 +543,104 @@ function setupLaporanEventListeners() {
       }
     });
   }
+
+  // ======================================================
+  // Task 2.1 — Tombol "Export & Bersihkan"
+  // Setelah export ZIP sukses, tawarkan opsi hapus foto nota yang diarsipkan
+  // ======================================================
+  const btnExportBersihkan = document.getElementById("btnExportBersihkan");
+  if (btnExportBersihkan) {
+    btnExportBersihkan.addEventListener("click", async () => {
+      const trxDenganFoto = filteredTrx.filter((t) => {
+        const items = pknByTrx.get(t.id) || [];
+        return items.some(hasFoto);
+      });
+
+      if (trxDenganFoto.length === 0) {
+        showToast("Tidak ada nota dengan foto dalam periode filter ini.", "warning");
+        return;
+      }
+
+      // Hitung estimasi foto dan MB yang akan dihapus
+      let totalFoto = 0;
+      let totalBytes = 0;
+
+      for (const t of trxDenganFoto) {
+        const items = pknByTrx.get(t.id) || [];
+        for (const p of items) {
+          if (p.foto) {
+            totalFoto++;
+            totalBytes += Math.round(p.foto.length * 0.75);
+          }
+          if (p.fotoThumb) {
+            totalBytes += Math.round(p.fotoThumb.length * 0.75);
+          }
+        }
+      }
+
+      const estimasiMb = (totalBytes / (1024 * 1024)).toFixed(2);
+      const trxIds = trxDenganFoto.map((t) => t.id);
+
+      // Tampilkan dialog konfirmasi ringkasan
+      const ringkasanHtml = `
+        <div style="text-align:center; padding: 0.5rem 0 1rem;">
+          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🗑️</div>
+          <p style="font-size: 1rem; color: var(--text-body); margin-bottom: 1.25rem;">
+            Fitur ini akan <strong>menghapus foto pakaian</strong> dari <strong>${trxIds.length} nota</strong>
+            dalam periode filter yang aktif saat ini.
+          </p>
+          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.25rem;">
+            <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1.5rem; text-align:center;">
+              <div style="font-size: 1.75rem; font-weight: 900; color: #92400e;">${totalFoto}</div>
+              <div style="font-size: 0.8rem; color: #78350f;">Foto akan dihapus</div>
+            </div>
+            <div style="background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1.5rem; text-align:center;">
+              <div style="font-size: 1.75rem; font-weight: 900; color: #14532d;">~${estimasiMb} MB</div>
+              <div style="font-size: 0.8rem; color: #166534;">Estimasi dibebaskan</div>
+            </div>
+          </div>
+          <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.875rem; font-size: 0.85rem; color: #9a3412; text-align:left; line-height:1.5;">
+            ⚠️ <strong>Data teks transaksi dan pakaian tetap tersimpan.</strong><br>
+            Hanya file foto yang dihapus dari penyimpanan browser.<br>
+            Pastikan Anda sudah mengunduh ZIP sebelum melanjutkan.
+          </div>
+        </div>
+      `;
+
+      showModal(
+        "Konfirmasi Hapus Foto Nota",
+        ringkasanHtml,
+        [
+          {
+            label: "Ya, Hapus Foto Sekarang",
+            className: "btn-danger",
+            onClick: async (close) => {
+              try {
+                btnExportBersihkan.disabled = true;
+                showToast("Menghapus foto dari penyimpanan...", "info");
+                const result = await purgeFotoNota(trxIds);
+                showToast(
+                  `Berhasil membebaskan ${result.estimasiMb} MB — ${result.fotoCount} foto dihapus dari ${trxIds.length} nota.`,
+                  "success"
+                );
+                await loadLaporanData();
+                close();
+              } catch (err) {
+                console.error("Gagal purge foto:", err);
+                showToast("Gagal menghapus foto: " + err.message, "error");
+              } finally {
+                btnExportBersihkan.disabled = false;
+              }
+            }
+          },
+          {
+            label: "Batal",
+            className: "btn-outline",
+            onClick: (close) => close()
+          }
+        ],
+        { size: "md" }
+      );
+    });
+  }
 }

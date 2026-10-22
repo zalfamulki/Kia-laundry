@@ -71,7 +71,7 @@
           </div>
 
           <!-- 2. Preferensi Mode Online & Offline -->
-          <div class="card">
+          <div class="card" style="margin-bottom: 1.5rem;">
             <div class="card-header">
               <h3 class="card-title">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
@@ -107,6 +107,31 @@
                     <div style="font-size:0.8rem; color:var(--text-muted);">Semua menu navigasi selalu terbuka.</div>
                   </div>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Pembersihan Foto Otomatis (Task 2.2) -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg>
+                3. Pembersihan Foto Otomatis
+              </h3>
+            </div>
+            <div class="card-body">
+              <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem; line-height:1.5;">
+                Foto pakaian dari transaksi yang sudah <strong>diambil</strong> lebih dari batas hari ini
+                akan ditawarkan untuk dibersihkan saat halaman Backup dibuka.
+                Data teks transaksi tetap tersimpan, hanya gambar yang dihapus.
+              </p>
+              <div class="form-group">
+                <label class="form-label" for="cfgBatasPurgeHari">Batas Umur Foto (hari setelah diambil)</label>
+                <input type="number" id="cfgBatasPurgeHari" class="form-control"
+                  min="7" max="365" step="1" style="max-width:180px;">
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:0.35rem;">
+                  Default: 90 hari. Nilai minimum: 7 hari.
+                </div>
               </div>
             </div>
           </div>
