@@ -149,11 +149,11 @@ function renderFooter() {
             <img src="${base}assets/logo.png" alt="KIA Laundry" style="width:38px; height:38px; border-radius:50%;" onerror="this.src='${base}assets/icon.svg'">
             <h3 style="margin-bottom:0; font-size:1.15rem; font-weight:800; letter-spacing:0.5px;">KIA LAUNDRY</h3>
           </div>
-          <p>Aplikasi operasional laundry lokal & offline-ready dengan sistem foto dokumentasi pakaian untuk menjaga kepercayaan dan kepuasan pelanggan.</p>
+          <p>Laundry harian dan satuan dengan antar-jemput setiap hari. Setiap pakaian dicatat dan difoto saat diterima, jadi tidak ada yang tertukar atau tertinggal.</p>
           <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:1rem;">
             <span class="pill-service" style="background:#1e293b; color:#38bdf8;">Layanan Antar Jemput</span>
             <span class="pill-service" style="background:#1e293b; color:#facc15;">Cuci Kiloan & Satuan</span>
-            <span class="pill-service" style="background:#1e293b; color:#a7f3d0;">IndexedDB Offline Ready</span>
+            <span class="pill-service" style="background:#1e293b; color:#a7f3d0;">Nota & Kabar via WhatsApp</span>
           </div>
         </div>
 
@@ -189,7 +189,7 @@ function renderFooter() {
       <div class="footer-bottom">
         <div>© ${new Date().getFullYear()} KIA Laundry. Clean & Fresh. Seluruh hak cipta dilindungi.</div>
         <div style="display:flex; gap:1.5rem;">
-          <span>Sistem Lokal Browser (Tanpa Server)</span>
+          <span>Antar-Jemput Setiap Hari</span>
           <span>Privacy & Data Aman</span>
         </div>
       </div>
