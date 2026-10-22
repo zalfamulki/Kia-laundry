@@ -49,19 +49,19 @@ async function loadDashboardStats() {
   // Belum bayar
   const belumBayar = allTrx.filter((t) => t.statusBayar === "belum");
 
-  // Update UI Element Counters
+  // Update UI Element Counters (Murni data riil, default 0 tanpa angka dummy)
   const elTrxHariIni = document.getElementById("statTrxHariIni");
-  if (elTrxHariIni) elTrxHariIni.textContent = trxHariIni.length || allTrx.length;
+  if (elTrxHariIni) elTrxHariIni.textContent = trxHariIni.length;
 
   const elPakaianProses = document.getElementById("statPakaianProses");
-  if (elPakaianProses) elPakaianProses.textContent = pakaianProses.length || allPakaian.length;
+  if (elPakaianProses) elPakaianProses.textContent = pakaianProses.length;
 
   const elSiapDiambil = document.getElementById("statSiapDiambil");
   if (elSiapDiambil) elSiapDiambil.textContent = siapDiambil.length;
 
   const elOmzetHariIni = document.getElementById("statOmzetHariIni");
   if (elOmzetHariIni) {
-    elOmzetHariIni.textContent = formatRupiah(omzetHariIni > 0 ? omzetHariIni : 109300);
+    elOmzetHariIni.textContent = formatRupiah(omzetHariIni);
   }
 
   const elBelumBayar = document.getElementById("statBelumBayar");
