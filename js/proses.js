@@ -5,10 +5,10 @@
  */
 
 const STAGES = [
-  { key: "masuk", title: "1. Masuk", next: "dicuci", nextLabel: "Cuci Sekarang →" },
-  { key: "dicuci", title: "2. Dicuci", next: "disetrika", nextLabel: "Setrika Sekarang →" },
-  { key: "disetrika", title: "3. Disetrika", next: "siap", nextLabel: "Tandai Siap →" },
-  { key: "siap", title: "4. Siap Diambil", next: "diambil", nextLabel: "Serahkan Cucian ✓" },
+  { key: "masuk", title: "1. Masuk", next: "dicuci", nextLabel: "Cuci Sekarang" },
+  { key: "dicuci", title: "2. Dicuci", next: "disetrika", nextLabel: "Setrika Sekarang" },
+  { key: "disetrika", title: "3. Disetrika", next: "siap", nextLabel: "Tandai Siap" },
+  { key: "siap", title: "4. Siap Diambil", next: "diambil", nextLabel: "Serahkan Cucian" },
   { key: "diambil", title: "5. Selesai Diambil", next: null, nextLabel: "" }
 ];
 
@@ -65,9 +65,9 @@ async function loadProsesBoard() {
 
         const nextActionBtn = stage.next
           ? `<button class="btn btn-sm ${stage.key === 'siap' ? 'btn-success' : 'btn-yellow'}" onclick="handleStageTransition('${t.id}', '${stage.next}')">
-              ${stage.nextLabel}
+              <span>${stage.nextLabel}</span>
             </button>`
-          : `<span style="font-size:0.75rem; color:#10b981; font-weight:700;">✓ Selesai</span>`;
+          : `<span style="font-size:0.75rem; color:#10b981; font-weight:700; display:inline-flex; align-items:center; gap:3px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Selesai</span>`;
 
         return `
           <div class="kanban-card">
@@ -173,7 +173,7 @@ function openChecklistModal(trx) {
     `,
     [
       {
-        label: "Konfirmasi & Serahkan Cucian ✓",
+        label: "Konfirmasi & Serahkan Cucian",
         className: "btn-success",
         onClick: async (close) => {
           const checkboxes = document.querySelectorAll(".pkn-check");

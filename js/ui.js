@@ -1,7 +1,7 @@
 /**
  * KIA LAUNDRY — UI Utility & Navigation Renderer
- * Mendukung navigasi konsisten multi-page, notifikasi toast, modal dialog,
- * format rupiah & tanggal, serta cetak struk nota.
+ * Mendukung navigasi bersih, modern, bebas emoji (100% SVG Icon),
+ * tata letak rapi satu baris, dan struk cetak standar POS.
  */
 
 // Menentukan path root relatif terhadap lokasi file HTML aktif
@@ -17,7 +17,7 @@ function getBasePath() {
 function renderNav(activeKey = "dashboard") {
   const base = getBasePath();
   
-  // 1. Top Announcement Bar
+  // 1. Top Announcement Bar (Kontak & Jam Buka)
   const topBarHtml = `
     <div class="top-bar">
       <div class="top-bar-inner">
@@ -27,7 +27,7 @@ function renderNav(activeKey = "dashboard") {
             Buka Setiap Hari: 07:00 - 21:00 WIB
           </span>
           <span class="top-bar-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
             Layanan Antar Jemput Tersedia
           </span>
         </div>
@@ -37,6 +37,7 @@ function renderNav(activeKey = "dashboard") {
             <a href="https://wa.me/6285179591769" target="_blank" rel="noopener">0851-7959-1769</a>
           </span>
           <span class="top-bar-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
             <a href="https://wa.me/628112291769" target="_blank" rel="noopener">0811-2291-769</a>
           </span>
         </div>
@@ -64,41 +65,39 @@ function renderNav(activeKey = "dashboard") {
     </li>
   `).join("");
 
-  // 2. Main Site Header
+  // 2. Main Site Header (Rapi, 1 Baris, Logo di kiri berjarak lega, Tanpa tombol double)
   const headerHtml = `
     ${topBarHtml}
     <header class="site-header">
       <div class="nav-container">
-        <a href="${base}index.html" class="brand-logo">
-          <img src="${base}assets/logo.png" alt="KIA Laundry" onerror="this.src='${base}assets/icon.svg'">
-          <span>KIA Laundry</span>
-          <span class="brand-badge">Clean & Fresh</span>
+        <a href="${base}index.html" class="brand-logo" title="Beranda KIA Laundry">
+          <img src="${base}assets/logo.png" alt="KIA Laundry Logo" onerror="this.src='${base}assets/icon.svg'">
+          <div class="brand-identity-row">
+            <span class="brand-name">KIA LAUNDRY</span>
+            <span class="brand-pill">Clean & Fresh</span>
+          </div>
         </a>
 
-        <ul class="nav-menu" id="navMenu">
-          ${menuHtml}
-        </ul>
+        <nav class="nav-center-wrapper">
+          <ul class="nav-menu" id="navMenu">
+            ${menuHtml}
+          </ul>
+        </nav>
 
         <div class="nav-actions">
-          <div id="modeBadge" class="mode-indicator online" title="Status Jaringan (Klik untuk info mode)" onclick="window.location.href='${base}pages/pengaturan.html'">
+          <div id="modeBadge" class="mode-indicator online" title="Status Jaringan (Klik untuk pengaturan mode)" onclick="window.location.href='${base}pages/pengaturan.html'">
             <span class="status-dot"></span>
             <span class="mode-text">Online</span>
           </div>
 
-          <a href="${base}pages/transaksi.html" class="btn btn-yellow btn-sm">
-            <span>+ Transaksi Baru</span>
-            <span class="btn-arrow-icon">→</span>
-          </a>
-
-          <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Menu">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <button class="mobile-toggle" id="mobileToggle" aria-label="Toggle Navigasi">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           </button>
         </div>
       </div>
     </header>
   `;
 
-  // Sisipkan di element #siteHeader atau awal body
   const headerElem = document.getElementById("siteHeader");
   if (headerElem) {
     headerElem.innerHTML = headerHtml;
@@ -117,7 +116,6 @@ function renderNav(activeKey = "dashboard") {
     });
   }
 
-  // Inisialisasi status mode koneksi
   updateModeBadge();
 }
 
@@ -130,12 +128,12 @@ function renderFooter() {
         <div class="cta-text">
           <span class="handwriting" style="color: #fef08a;">Semua Bisa Bersih & Segar!</span>
           <h2>Pakaian Rapi, Bersih, & Wangi Tanpa Ribet</h2>
-          <p>Layanan cuci satuan & kiloan dengan dokumentasi foto real-time agar pakaian pelanggan tidak pernah tertukar atau terlupa.</p>
+          <p>Layanan cuci satuan & kiloan dengan dokumentasi foto digital setiap potong pakaian. Tidak ada yang tertukar dan tidak ada yang tertinggal.</p>
         </div>
         <div class="cta-action">
           <a href="https://wa.me/6285179591769" target="_blank" class="btn btn-yellow">
             <span>Chat WhatsApp 1</span>
-            <span class="btn-arrow-icon">→</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
           <a href="https://wa.me/628112291769" target="_blank" class="btn btn-outline" style="background: rgba(255,255,255,0.15); color: #fff; border-color: rgba(255,255,255,0.4);">
             <span>WhatsApp 2 (Antar Jemput)</span>
@@ -149,7 +147,7 @@ function renderFooter() {
         <div class="footer-brand">
           <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom: 0.8rem;">
             <img src="${base}assets/logo.png" alt="KIA Laundry" style="width:38px; height:38px; border-radius:50%;" onerror="this.src='${base}assets/icon.svg'">
-            <h3 style="margin-bottom:0;">KIA LAUNDRY</h3>
+            <h3 style="margin-bottom:0; font-size:1.15rem; font-weight:800; letter-spacing:0.5px;">KIA LAUNDRY</h3>
           </div>
           <p>Aplikasi operasional laundry lokal & offline-ready dengan sistem foto dokumentasi pakaian untuk menjaga kepercayaan dan kepuasan pelanggan.</p>
           <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:1rem;">
@@ -240,7 +238,18 @@ function showToast(message, type = "info") {
 
   const toast = document.createElement("div");
   toast.className = `toast ${type}`;
+  
+  let iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+  if (type === "success") {
+    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+  } else if (type === "error") {
+    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`;
+  } else if (type === "warning") {
+    iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+  }
+
   toast.innerHTML = `
+    ${iconSvg}
     <span>${message}</span>
   `;
 
@@ -274,7 +283,9 @@ function showModal(title, contentHtml, buttons = []) {
     <div class="modal-container" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h3 class="modal-title">${title}</h3>
-        <button class="modal-close" onclick="closeModal()">&times;</button>
+        <button class="modal-close" onclick="closeModal()" aria-label="Tutup">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
       <div class="modal-body">
         ${contentHtml}
@@ -348,7 +359,7 @@ function getBayarBadge(statusBayar) {
   return `<span class="badge ${item.class}">${item.label}</span>`;
 }
 
-// Cetak Struk Nota Standar POS
+// Cetak Struk Nota POS
 function cetakNotaStruk(transaksi, pakaianList = [], settings = {}) {
   const printWindow = window.open("", "_blank", "width=400,height=600");
   const namaToko = settings.namaLaundry || "KIA LAUNDRY";
@@ -421,8 +432,8 @@ function cetakNotaStruk(transaksi, pakaianList = [], settings = {}) {
       </div>
       <div class="line"></div>
       <div class="text-center" style="font-size: 10px;">
-        * Foto kondisi pakaian disimpan dalam sistem kami.<br>
-        * Pengambilan wajib menunjukkan nota/WA.<br>
+        * Foto kondisi pakaian tersimpan dalam sistem kami.<br>
+        * Pengambilan wajib menunjukkan nota / pesan WhatsApp.<br>
         Terima Kasih Atas Kepercayaan Anda!
       </div>
     </body>

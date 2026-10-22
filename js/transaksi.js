@@ -448,7 +448,9 @@ async function handleSimpanTransaksi(e) {
       "Transaksi Berhasil Disimpan",
       `
       <div style="text-align:center; padding:1rem 0;">
-        <div style="font-size:3rem; color:#10b981; margin-bottom:0.5rem;">✓</div>
+        <div style="margin-bottom:0.75rem;">
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
         <h3 style="font-size:1.35rem; font-weight:800; color:#0f172a;">${trxId}</h3>
         <p style="color:#64748b; font-size:0.95rem; margin-top:0.25rem;">
           Data ${keranjangPakaian.length} potong pakaian dan customer berhasil disimpan ke IndexedDB lokal.
