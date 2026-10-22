@@ -23,91 +23,116 @@
 
   <main class="main-wrapper">
 
-    <!-- 1. HERO SECTION (Terinspirasi Layout Maya Web Studio: Kuning Cerah, Ramah, Human-Crafted) -->
+    <!-- 1. HERO SECTION (Layout Rapi, Warna Cerah Segar, Bebas Emoji, Mesin Cuci Modern) -->
     <section class="hero-section">
       <div class="hero-content">
         <div class="hero-pill">
-          <span>✨</span>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
           <span>KIA LAUNDRY • CLEAN & FRESH</span>
         </div>
 
         <h1 class="hero-title">
-          Mencuci & Menjaga Pakaian Tetap Bersih <span class="highlight-yellow">and Fresh <span class="sun-doodle">☀️</span></span>
+          Mencuci & Menjaga Pakaian Tetap Bersih 
+          <span class="highlight-yellow">
+            and Fresh
+            <svg class="sun-doodle" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          </span>
         </h1>
 
         <p class="hero-desc">
           Sistem operasional laundry modern dengan pencatatan & foto digital setiap potong pakaian. 
-          Pakaian pelanggan aman, tidak pernah tertukar atau terlupa, siap pakai kapan saja.
+          Pakaian pelanggan aman, tidak pernah tertukar atau terlupa, higienis & rapi.
         </p>
 
         <div class="hero-buttons">
           <a href="./pages/transaksi.html" class="btn btn-yellow btn-lg">
-            <span>+ Transaksi Baru</span>
-            <span class="btn-arrow-icon">→</span>
+            <span>Mulai Transaksi Baru</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
           </a>
 
           <a href="./pages/galeri.html" class="btn btn-outline btn-lg">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             <span>Galeri Pakaian</span>
           </a>
         </div>
 
         <div class="hero-note">
-          <span class="handwriting">✓ Layanan antar jemput & dokumentasi foto siap sedia!</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span class="handwriting">Layanan antar jemput & dokumentasi foto siap sedia!</span>
         </div>
       </div>
 
-      <div class="hero-visual">
+      <!-- VISUAL STAGE: MESIN CUCI MODERN DENGAN PAKAIAN BERPUTAR -->
+      <div class="hero-visual-stage">
         <div class="hero-blob-bg"></div>
 
-        <div class="hero-image-wrapper">
-          <div class="hero-badge-floating">
-            <div class="badge-num">100%</div>
-            <div>
-              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Jaminan</div>
-              <div style="font-size:0.85rem; font-weight:800;">Tidak Tertukar</div>
+        <div class="washing-machine-container">
+          <!-- Floating Badge Atas (Bebas dari tumpang tindih) -->
+          <div class="wm-floating-pill-top">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span>Jaminan 100% Tidak Tertukar</span>
+          </div>
+
+          <!-- Unit Mesin Cuci -->
+          <div class="washing-machine">
+            <!-- Control Deck -->
+            <div class="wm-panel">
+              <div class="wm-drawer">
+                <span>KIA</span>
+              </div>
+              <div class="wm-display">
+                <div class="wm-display-time">00:45</div>
+                <div class="wm-display-status">CLEAN & FRESH</div>
+              </div>
+              <div class="wm-dial" title="Putar mode cucian"></div>
+            </div>
+
+            <!-- Tabung Kaca Porthole & Drum -->
+            <div class="wm-door-outer">
+              <div class="wm-door-glass">
+                <div class="wm-drum-rotor">
+                  <!-- Pakaian 1: Polo Shirt Ungu (Khas KIA Laundry Logo) -->
+                  <svg class="wm-clothes-item wm-clothes-shirt" viewBox="0 0 100 100">
+                    <path d="M30 25 L45 35 L55 35 L70 25 L85 45 L72 55 L70 85 L30 85 L28 55 L15 45 Z" fill="#9333ea" stroke="#ffffff" stroke-width="3"/>
+                    <polygon points="45,35 50,48 55,35" fill="#ffffff"/>
+                  </svg>
+
+                  <!-- Pakaian 2: Celana Biru Muda -->
+                  <svg class="wm-clothes-item wm-clothes-pants" viewBox="0 0 100 100">
+                    <path d="M25 20 L75 20 L70 85 L53 85 L50 45 L47 85 L30 85 Z" fill="#38bdf8" stroke="#ffffff" stroke-width="3"/>
+                  </svg>
+
+                  <!-- Pakaian 3: Handuk Kuning Bersih -->
+                  <svg class="wm-clothes-item wm-clothes-towel" viewBox="0 0 100 100">
+                    <rect x="20" y="30" width="60" height="40" rx="6" fill="#facc15" stroke="#ffffff" stroke-width="3"/>
+                  </svg>
+                </div>
+
+                <!-- Gelembung Sabun Dinamis -->
+                <div class="wm-bubble b1"></div>
+                <div class="wm-bubble b2"></div>
+                <div class="wm-bubble b3"></div>
+                <div class="wm-bubble b4"></div>
+              </div>
+            </div>
+
+            <!-- Panel Bawah -->
+            <div class="wm-base">
+              <div class="wm-brand-label">INVERTER DIRECT DRIVE</div>
+              <div class="wm-filter-cap"></div>
             </div>
           </div>
 
-          <div class="hero-main-card">
-            <div style="display:flex; align-items:center; gap:0.85rem; margin-bottom:1rem;">
-              <img src="./assets/logo.png" alt="Logo" style="width:58px; height:58px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
-              <div>
-                <h4 style="font-size:1.1rem; font-weight:800; color:var(--text-main);">KIA LAUNDRY</h4>
-                <p style="font-size:0.825rem; color:var(--primary); font-weight:700;">Clean & Fresh — Semua Bisa</p>
-              </div>
-            </div>
-
-            <div style="background:var(--bg-muted); border-radius:12px; padding:0.85rem; font-size:0.85rem; margin-bottom:1rem;">
-              <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
-                <span style="color:var(--text-muted);">Sistem Penyimpanan:</span>
-                <strong style="color:#059669;">IndexedDB (Lokal & Offline)</strong>
-              </div>
-              <div style="display:flex; justify-content:space-between;">
-                <span style="color:var(--text-muted);">Antar Jemput:</span>
-                <strong style="color:var(--primary);">Aktif Setiap Hari</strong>
-              </div>
-            </div>
-
-            <div style="display:flex; gap:0.5rem;">
-              <a href="https://wa.me/6285179591769" target="_blank" class="btn btn-sm btn-yellow" style="flex:1;">
-                WA: 0851-7959-1769
-              </a>
-              <a href="https://wa.me/628112291769" target="_blank" class="btn btn-sm btn-outline" style="flex:1;">
-                WA: 0811-2291-769
-              </a>
-            </div>
-          </div>
-
-          <div class="hero-badge-bottom">
-            <span>●</span>
-            <span>Kamera Foto Digital Aktif</span>
+          <!-- Floating Badge Bawah -->
+          <div class="wm-floating-pill-bottom">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Dokumentasi Foto Digital Kamera Aktif</span>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- 2. QUICK TRACKING STATUS (Pelanggan / Kasir bisa langsung cek nomor nota) -->
+    <!-- 2. QUICK TRACKING STATUS -->
     <section class="tracking-card">
       <div class="tracking-title">
         <div class="stat-icon blue" style="width:44px; height:44px;">
@@ -115,7 +140,7 @@
         </div>
         <div>
           <h3>Cek Status Cucian Pelanggan</h3>
-          <p>Masukkan Nomor Transaksi (TRX) atau No. WhatsApp untuk melacak progres</p>
+          <p>Ketik Nomor Transaksi (TRX) atau No. WhatsApp untuk melacak progres</p>
         </div>
       </div>
 
@@ -123,19 +148,22 @@
         <input type="text" class="form-control" id="trackingInput" placeholder="Contoh: TRX-20261022-001 atau 0812xxxx" required>
         <button type="submit" class="btn btn-primary">
           <span>Lacak</span>
-          <span class="btn-arrow-icon">→</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </button>
       </form>
     </section>
 
-    <!-- 3. OPERATIONAL METRICS (Ringkasan Cepat Hari Ini) -->
+    <!-- 3. OPERATIONAL METRICS (Ringkasan Real-Time Hari Ini Tanpa Dummy) -->
     <section>
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
         <div>
           <h2 style="font-size:1.5rem; font-weight:800; color:var(--text-main);">Ringkasan Operasional</h2>
           <p style="font-size:0.875rem; color:var(--text-muted);">Aktivitas pengerjaan laundry hari ini di perangkat Anda</p>
         </div>
-        <a href="./pages/laporan.html" class="btn btn-sm btn-outline">Lihat Laporan Lengkap →</a>
+        <a href="./pages/laporan.html" class="btn btn-sm btn-outline">
+          <span>Lihat Laporan Lengkap</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
       </div>
 
       <div class="stat-grid">
@@ -193,7 +221,10 @@
             <span class="badge-dot" style="background:#10b981; width:10px; height:10px;"></span>
             Cucian Siap Diambil
           </h3>
-          <a href="./pages/proses.html" class="btn btn-sm btn-ghost">Semua Proses →</a>
+          <a href="./pages/proses.html" class="btn btn-sm btn-ghost">
+            <span>Semua Proses</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
         </div>
         <div class="card-body" id="listSiapDiambil">
           <div style="text-align:center; padding:1.5rem; color:var(--text-muted);">Memuat data cucian siap...</div>
@@ -219,7 +250,7 @@
       <div class="section-title-center">
         <span class="section-tag">Layanan & Harga Transparan</span>
         <h2 class="section-heading">Simple Packages. <span style="font-family:'Caveat', cursive; color:var(--primary); font-size:2.8rem;">Clean Clothes.</span></h2>
-        <p style="color:var(--text-muted); font-size:1rem;">Pilihan layanan fleksibel untuk kebutuhan pakaian sehari-hari hingga perawatan khusus.</p>
+        <p style="color:var(--text-muted); font-size:1rem;">Pilihan layanan fleksibel untuk kebutuhan pakaian harian hingga perawatan khusus.</p>
       </div>
 
       <div class="packages-grid">
@@ -246,7 +277,10 @@
 
         <!-- Paket 2: Most Popular (Kuning Cerah seperti Maya) -->
         <div class="package-card popular">
-          <div class="popular-badge">⭐ Paling Diminati Pelanggan</div>
+          <div class="popular-badge">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <span>Paling Diminati Pelanggan</span>
+          </div>
           <div class="package-header" style="margin-top:0.5rem;">
             <div class="package-name">
               <span>Cuci + Setrika Uap</span>
@@ -264,7 +298,10 @@
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Foto kondisi awal & hanger rapi</li>
             <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Layanan antar jemput cepat</li>
           </ul>
-          <a href="./pages/transaksi.html" class="btn btn-yellow" style="width:100%;">Mulai Transaksi →</a>
+          <a href="./pages/transaksi.html" class="btn btn-yellow" style="width:100%;">
+            <span>Mulai Transaksi</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </a>
         </div>
 
         <!-- Paket 3: Satuan / Premium -->
@@ -300,7 +337,13 @@
           </h2>
         </div>
         <div style="display:flex; align-items:center; gap:0.5rem;">
-          <span style="font-size:1.5rem; color:#f59e0b;">★★★★★</span>
+          <div style="display:inline-flex; gap:2px; color:#f59e0b;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
           <span style="font-weight:700; color:var(--text-main);">4.9/5 dari 850+ Pelanggan</span>
         </div>
       </div>

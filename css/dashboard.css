@@ -1,14 +1,15 @@
 /* ========================================================
    KIA LAUNDRY — Dashboard & Landing Page Styles (dashboard.css)
-   Cerah, Bersih, Segar, Terinspirasi Layout Maya Web Studio
+   Cerah, Bersih, Segar, Animasi Mesin Cuci Modern & Interaktif
+   Bebas Emoji — 100% SVG Icon & Tata Letak Rapi Tanpa Tumpang Tindih
    ======================================================== */
 
 /* Hero Section */
 .hero-section {
   display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
+  grid-template-columns: 1.1fr 0.9fr;
   align-items: center;
-  gap: 3rem;
+  gap: 3.5rem;
   padding: 2.5rem 0 3.5rem;
   position: relative;
 }
@@ -25,12 +26,16 @@
   padding: 0.4rem 1rem;
   background-color: var(--primary-light);
   color: var(--primary-dark);
-  font-size: 0.85rem;
+  font-size: 0.825rem;
   font-weight: 700;
   border-radius: var(--radius-full);
   margin-bottom: 1.25rem;
   letter-spacing: 0.5px;
   text-transform: uppercase;
+}
+
+.hero-pill svg {
+  color: var(--primary);
 }
 
 .hero-title {
@@ -45,13 +50,9 @@
 .hero-title .highlight-yellow {
   color: var(--accent-yellow-hover);
   position: relative;
-  display: inline-block;
-}
-
-.hero-title .sun-doodle {
-  display: inline-block;
-  margin-left: 0.35rem;
-  color: var(--accent-yellow);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
 .hero-desc {
@@ -76,89 +77,324 @@
   gap: 0.5rem;
 }
 
-/* Hero Visual Art (Matching Maya Organic Blob Backdrop) */
-.hero-visual {
+/* ========================================================
+   MODERN SMART WASHING MACHINE SHOWCASE
+   Mesin Cuci KIA Laundry dengan Animasi Drum & Pakaian
+   ======================================================== */
+.hero-visual-stage {
   position: relative;
   display: flex;
   justify-content: center;
   align-items: center;
+  min-height: 480px;
 }
 
+/* Organic Yellow Backdrop (Tetap lembut di latar, tidak menutupi kartu) */
 .hero-blob-bg {
   position: absolute;
-  width: 90%;
-  height: 90%;
+  width: 95%;
+  height: 95%;
   background: #fde047;
-  border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  border-radius: 48% 52% 65% 35% / 40% 50% 50% 60%;
   z-index: 1;
-  transform: rotate(-3deg);
-  transition: all 0.5s ease;
+  transform: rotate(-2deg);
+  opacity: 0.85;
+  transition: transform 0.5s ease;
 }
 
-.hero-visual:hover .hero-blob-bg {
+.hero-visual-stage:hover .hero-blob-bg {
   transform: rotate(2deg) scale(1.02);
 }
 
-.hero-image-wrapper {
+.washing-machine-container {
   position: relative;
   z-index: 2;
-  width: 100%;
-  max-width: 420px;
-  text-align: center;
-}
-
-.hero-main-card {
-  background: #ffffff;
-  border-radius: var(--radius-xl);
-  padding: 1.75rem;
-  box-shadow: 0 20px 40px -15px rgba(2, 132, 199, 0.18);
-  border: 1px solid var(--border-light);
-  text-align: left;
-}
-
-.hero-badge-floating {
-  position: absolute;
-  top: 15px;
-  right: -10px;
-  background: #ffffff;
-  padding: 0.75rem 1.25rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.65rem;
-  font-weight: 800;
-  color: var(--text-main);
-  z-index: 3;
-  border: 1px solid var(--border-light);
 }
 
-.hero-badge-floating .badge-num {
-  font-size: 1.6rem;
-  color: var(--primary);
-  line-height: 1;
-}
-
-.hero-badge-bottom {
-  position: absolute;
-  bottom: -15px;
-  left: -10px;
+/* Badges Atas & Bawah yang Rapi dan Tidak Tumpang Tindih */
+.wm-floating-pill-top {
   background: #ffffff;
-  padding: 0.65rem 1.15rem;
+  padding: 0.6rem 1.15rem;
   border-radius: var(--radius-full);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 8px 20px -4px rgba(2, 132, 199, 0.2);
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  font-size: 0.825rem;
+  font-weight: 800;
+  color: var(--text-main);
+  border: 1px solid var(--border-light);
+  margin-bottom: -15px;
+  z-index: 4;
+}
+
+.wm-floating-pill-bottom {
+  background: #ffffff;
+  padding: 0.65rem 1.25rem;
+  border-radius: var(--radius-full);
+  box-shadow: 0 8px 20px -4px rgba(16, 185, 129, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.825rem;
   font-weight: 700;
   color: #065f46;
   background-color: #ecfdf5;
   border: 1px solid #a7f3d0;
-  z-index: 3;
+  margin-top: -15px;
+  z-index: 4;
 }
 
-/* Quick Tracking Bar */
+/* Unit Mesin Cuci */
+.washing-machine {
+  width: 320px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 2px solid #e2e8f0;
+  border-radius: 28px;
+  box-shadow: 0 25px 45px -10px rgba(15, 23, 42, 0.12), 0 0 0 1px #ffffff inset;
+  padding: 1.5rem 1.5rem 1.25rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1.15rem;
+}
+
+/* Control Panel Atas */
+.wm-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding-bottom: 0.85rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.wm-drawer {
+  width: 70px;
+  height: 38px;
+  background: #f1f5f9;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: var(--primary);
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.wm-drawer::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  width: 30px;
+  height: 3px;
+  background: #94a3b8;
+  border-radius: 2px;
+}
+
+.wm-display {
+  flex: 1;
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 0.35rem 0.6rem;
+  text-align: center;
+  border: 1px solid #334155;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15) inset;
+}
+
+.wm-display-time {
+  font-family: monospace;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 1px;
+  line-height: 1;
+}
+
+.wm-display-status {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: #4ade80;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.wm-dial {
+  width: 38px;
+  height: 38px;
+  background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
+  border: 2px solid #94a3b8;
+  border-radius: 50%;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+}
+
+.wm-dial::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 3px;
+  height: 8px;
+  background: var(--primary);
+  border-radius: 2px;
+}
+
+/* Pintu Kaca & Tabung Berputar */
+.wm-door-outer {
+  width: 220px;
+  height: 220px;
+  margin: 0 auto;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e2e8f0 0%, #ffffff 50%, #cbd5e1 100%);
+  border: 6px solid #94a3b8;
+  box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.3), 0 0 0 4px #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.wm-door-glass {
+  width: 175px;
+  height: 175px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0284c7 0%, #0369a1 60%, #075985 100%);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.4) inset;
+}
+
+/* Glass Reflection Highlight */
+.wm-door-glass::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  width: 135px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 100%);
+  transform: rotate(-25deg);
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Air & Pakaian Berputar */
+.wm-drum-rotor {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: drumSpin 6s linear infinite;
+}
+
+.wm-clothes-item {
+  position: absolute;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+.wm-clothes-shirt {
+  width: 62px;
+  height: 62px;
+  top: 25px;
+  left: 30px;
+  transform: rotate(20deg);
+  animation: tumble1 3s ease-in-out infinite alternate;
+}
+
+.wm-clothes-pants {
+  width: 54px;
+  height: 54px;
+  bottom: 30px;
+  right: 35px;
+  transform: rotate(-35deg);
+  animation: tumble2 4s ease-in-out infinite alternate;
+}
+
+.wm-clothes-towel {
+  width: 44px;
+  height: 44px;
+  top: 45px;
+  right: 25px;
+  transform: rotate(45deg);
+}
+
+/* Gelembung Sabun Naik */
+.wm-bubble {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(255, 255, 255, 0.8) inset;
+  pointer-events: none;
+  animation: floatBubble 2.5s ease-in infinite;
+}
+
+.b1 { width: 14px; height: 14px; bottom: 15px; left: 45px; animation-delay: 0s; }
+.b2 { width: 18px; height: 18px; bottom: 10px; left: 85px; animation-delay: 0.8s; }
+.b3 { width: 12px; height: 12px; bottom: 20px; left: 120px; animation-delay: 1.4s; }
+.b4 { width: 10px; height: 10px; bottom: 15px; left: 65px; animation-delay: 1.9s; }
+
+/* Panel Bawah Mesin */
+.wm-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.wm-filter-cap {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  border: 1px solid #cbd5e1;
+}
+
+.wm-brand-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #64748b;
+  letter-spacing: 0.5px;
+}
+
+/* Keyframes */
+@keyframes drumSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes tumble1 {
+  0% { transform: translate(0, 0) rotate(15deg); }
+  100% { transform: translate(8px, 12px) rotate(45deg); }
+}
+
+@keyframes tumble2 {
+  0% { transform: translate(0, 0) rotate(-35deg); }
+  100% { transform: translate(-10px, -8px) rotate(-10deg); }
+}
+
+@keyframes floatBubble {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  50% { opacity: 0.9; }
+  100% { transform: translateY(-130px) scale(1.1); opacity: 0; }
+}
+
+/* ========================================================
+   TRACKING CARD & STATS
+   ======================================================== */
 .tracking-card {
   background: #ffffff;
   border-radius: var(--radius-xl);
@@ -176,7 +412,7 @@
 .tracking-title {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.85rem;
 }
 
 .tracking-title h3 {
@@ -198,7 +434,7 @@
   max-width: 520px;
 }
 
-/* Operational Alerts (Ready for pickup & Overdue) */
+/* Alerts Dashboard */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -238,7 +474,7 @@
   color: var(--text-muted);
 }
 
-/* Packages Section (Matching Maya 3-Column Pricing) */
+/* Packages Section */
 .section-title-center {
   text-align: center;
   max-width: 650px;
@@ -305,9 +541,13 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  padding: 0.35rem 0;
+  padding: 0.4rem 0;
   border-top-left-radius: inherit;
   border-top-right-radius: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
 }
 
 .package-header {
@@ -364,7 +604,7 @@
   flex-shrink: 0;
 }
 
-/* Testimonial Cards */
+/* Testimonials */
 .testimonials-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -385,8 +625,9 @@
   font-size: 3rem;
   color: var(--primary);
   line-height: 1;
-  opacity: 0.3;
+  opacity: 0.25;
   margin-bottom: -0.5rem;
+  font-family: serif;
 }
 
 .testimonial-text {
@@ -414,7 +655,7 @@
   font-weight: 800;
 }
 
-/* Responsiveness */
+/* Responsive */
 @media (max-width: 992px) {
   .hero-section {
     grid-template-columns: 1fr;
@@ -452,6 +693,20 @@
     font-size: 2.1rem;
   }
 
+  .washing-machine {
+    width: 280px;
+  }
+
+  .wm-door-outer {
+    width: 190px;
+    height: 190px;
+  }
+
+  .wm-door-glass {
+    width: 150px;
+    height: 150px;
+  }
+
   .tracking-card {
     flex-direction: column;
     align-items: stretch;
@@ -460,11 +715,5 @@
   .tracking-form {
     flex-direction: column;
     max-width: 100%;
-  }
-
-  .hero-badge-floating {
-    top: 5px;
-    right: 5px;
-    padding: 0.5rem 0.85rem;
   }
 }
