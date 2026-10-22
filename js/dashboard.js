@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     showToast("Gagal menginisialisasi data lokal.", "error");
   }
 
-  // Setup form tracking
+  // Kolom pencarian tracking di atas foto mesin cuci
   const trackingForm = document.getElementById("trackingForm");
   if (trackingForm) {
     trackingForm.addEventListener("submit", handleTrackingSearch);
