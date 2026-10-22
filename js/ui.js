@@ -49,7 +49,6 @@ function renderNav(activeKey = "dashboard") {
   const navItems = [
     { key: "dashboard", label: "Dashboard", href: `${base}index.html` },
     { key: "transaksi", label: "Transaksi", href: `${base}pages/transaksi.html` },
-    { key: "galeri", label: "Galeri Foto", href: `${base}pages/galeri.html` },
     { key: "proses", label: "Proses", href: `${base}pages/proses.html` },
     { key: "customer", label: "Customer", href: `${base}pages/customer.html` },
     { key: "laporan", label: "Laporan", href: `${base}pages/laporan.html` },
@@ -162,8 +161,8 @@ function renderFooter() {
           <ul>
             <li><a href="${base}index.html">Dashboard Utama</a></li>
             <li><a href="${base}pages/transaksi.html">Transaksi Masuk</a></li>
-            <li><a href="${base}pages/galeri.html">Galeri Foto Pakaian</a></li>
             <li><a href="${base}pages/proses.html">Monitoring Proses</a></li>
+            <li><a href="${base}pages/backup.html">Backup Data</a></li>
           </ul>
         </div>
 
@@ -264,7 +263,7 @@ function showToast(message, type = "info") {
 }
 
 // Modal Dialog
-function showModal(title, contentHtml, buttons = []) {
+function showModal(title, contentHtml, buttons = [], options = {}) {
   let backdrop = document.getElementById("customModalBackdrop");
   if (!backdrop) {
     backdrop = document.createElement("div");
@@ -279,8 +278,10 @@ function showModal(title, contentHtml, buttons = []) {
     </button>
   `).join("");
 
+  const sizeClass = options.size === "lg" ? "modal-lg" : "";
+
   backdrop.innerHTML = `
-    <div class="modal-container" role="dialog" aria-modal="true">
+    <div class="modal-container ${sizeClass}" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h3 class="modal-title">${title}</h3>
         <button class="modal-close" onclick="closeModal()" aria-label="Tutup">
@@ -314,6 +315,14 @@ function closeModal() {
   }
 }
 
+// Escape teks dari input pengguna sebelum dimasukkan ke HTML
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>"']/g, (char) => {
+    const map = { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" };
+    return map[char];
+  });
+}
+
 // Formatter Helpers
 function formatRupiah(amount) {
   const num = Number(amount) || 0;
@@ -342,7 +351,7 @@ function getStatusBadge(status) {
     masuk: { label: "Masuk", class: "badge-masuk" },
     dicuci: { label: "Dicuci", class: "badge-cuci" },
     disetrika: { label: "Disetrika", class: "badge-setrika" },
-    siap: { label: "Siap Diambil", class: "badge-siap" },
+    siap: { label: "Siap", class: "badge-siap" },
     diambil: { label: "Sudah Diambil", class: "badge-diambil" }
   };
   const item = map[status] || { label: status, class: "badge-masuk" };

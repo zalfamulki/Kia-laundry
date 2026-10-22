@@ -529,6 +529,26 @@ img {
     display: none;
   }
 
+  /* Cegah header melebar keluar viewport di layar kecil */
+  .nav-container {
+    gap: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .brand-logo {
+    margin-right: 0;
+    gap: 0.5rem;
+  }
+
+  .brand-name {
+    font-size: 1rem;
+  }
+
+  .brand-pill {
+    display: none;
+  }
+
   .footer-container {
     grid-template-columns: 1fr;
     gap: 2rem;

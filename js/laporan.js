@@ -1,13 +1,17 @@
 /**
  * KIA LAUNDRY — Laporan & Export Logic
  * Memfilter transaksi & pakaian berdasarkan rentang tanggal/status/layanan,
- * menyajikan ringkasan omzet, dan mengekspor ke Excel Opsi A (ZIP foto) & Opsi B (Foto tertanam).
+ * menyajikan ringkasan omzet, pratinjau foto per nota, dan mengekspor ke
+ * Excel Opsi A (ZIP foto) & Opsi B (Foto tertanam).
  */
 
 let masterTrx = [];
 let masterPkn = [];
 let filteredTrx = [];
 let filteredPkn = [];
+let pknByTrx = new Map();
+let defaultFilterDates = { start: "", end: "" };
+let activeFotoNota = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
   renderNav("laporan");
@@ -16,8 +20,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await initDB();
     setupDefaultFilterDates();
-    await loadLaporanData();
     setupLaporanEventListeners();
+    await loadLaporanData();
   } catch (err) {
     console.error("Gagal inisialisasi laporan:", err);
     showToast("Gagal memuat data laporan.", "error");
@@ -32,6 +36,8 @@ function setupDefaultFilterDates() {
 
   const firstDay = `${year}-${month}-01`;
   const today = `${year}-${month}-${day}`;
+
+  defaultFilterDates = { start: firstDay, end: today };
 
   const elStart = document.getElementById("filterDateStart");
   const elEnd = document.getElementById("filterDateEnd");
@@ -48,8 +54,8 @@ async function loadLaporanData() {
 }
 
 function applyLaporanFilters() {
-  const startVal = document.getElementById("filterDateStart")?.value;
-  const endVal = document.getElementById("filterDateEnd")?.value;
+  const startVal = document.getElementById("filterDateStart")?.value || "";
+  const endVal = document.getElementById("filterDateEnd")?.value || "";
   const statusVal = document.getElementById("filterStatusLaporan")?.value || "all";
   const bayarVal = document.getElementById("filterBayarLaporan")?.value || "all";
   const layananVal = document.getElementById("filterLayananLaporan")?.value || "all";
@@ -74,26 +80,45 @@ function applyLaporanFilters() {
     return true;
   });
 
-  const validTrxIds = filteredTrx.map((t) => t.id);
-  filteredPkn = masterPkn.filter((p) => validTrxIds.includes(p.transaksiId));
+  const validTrxIds = new Set(filteredTrx.map((t) => t.id));
+  filteredPkn = masterPkn.filter((p) => validTrxIds.has(p.transaksiId));
+  pknByTrx = groupPakaianByTrx(filteredPkn);
 
   updateLaporanSummary();
   renderLaporanTable();
+  updateFilterBadge();
+}
+
+// Kelompokkan pakaian per transaksi sekali saja (hindari pencarian berulang)
+function groupPakaianByTrx(list) {
+  const map = new Map();
+
+  for (const p of list) {
+    if (!map.has(p.transaksiId)) map.set(p.transaksiId, []);
+    map.get(p.transaksiId).push(p);
+  }
+
+  return map;
 }
 
 function updateLaporanSummary() {
   const countTrx = filteredTrx.length;
   const countPcs = filteredPkn.reduce((sum, p) => sum + (Number(p.jumlah) || 1), 0);
   const totalOmzet = filteredTrx.reduce((sum, t) => sum + (Number(t.totalHarga) || 0), 0);
-  
+
   const belumBayar = filteredTrx
     .filter((t) => t.statusBayar === "belum")
     .reduce((sum, t) => sum + (Number(t.totalHarga) || 0), 0);
 
-  document.getElementById("sumCountTrx").textContent = countTrx;
-  document.getElementById("sumCountPcs").textContent = countPcs;
-  document.getElementById("sumTotalOmzet").textContent = formatRupiah(totalOmzet);
-  document.getElementById("sumBelumBayar").textContent = formatRupiah(belumBayar);
+  const elCountTrx = document.getElementById("sumCountTrx");
+  const elCountPcs = document.getElementById("sumCountPcs");
+  const elOmzet = document.getElementById("sumTotalOmzet");
+  const elBelum = document.getElementById("sumBelumBayar");
+
+  if (elCountTrx) elCountTrx.textContent = countTrx;
+  if (elCountPcs) elCountPcs.textContent = countPcs;
+  if (elOmzet) elOmzet.textContent = formatRupiah(totalOmzet);
+  if (elBelum) elBelum.textContent = formatRupiah(belumBayar);
 }
 
 function renderLaporanTable() {
@@ -103,7 +128,7 @@ function renderLaporanTable() {
   if (filteredTrx.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="8" style="text-align:center; padding:2.5rem; color:#64748b;">
+        <td colspan="9" style="text-align:center; padding:2.5rem; color:#64748b;">
           Tidak ada data transaksi yang cocok dengan periode dan kriteria filter ini.
         </td>
       </tr>
@@ -113,31 +138,279 @@ function renderLaporanTable() {
 
   tbody.innerHTML = filteredTrx
     .map((t, idx) => {
-      const items = filteredPkn.filter((p) => p.transaksiId === t.id);
+      const items = pknByTrx.get(t.id) || [];
       const totalPcs = items.reduce((acc, p) => acc + (Number(p.jumlah) || 1), 0);
 
       return `
         <tr>
           <td>${idx + 1}</td>
-          <td><strong>${t.id}</strong></td>
+          <td><strong>${escapeHtml(t.id)}</strong></td>
           <td>${formatTanggal(t.tanggalMasuk, true)}</td>
           <td>
-            <strong>${t.namaCustomer}</strong>
-            <div style="font-size:0.78rem; color:#64748b;">${t.noHp}</div>
+            <strong>${escapeHtml(t.namaCustomer)}</strong>
+            <div style="font-size:0.78rem; color:#64748b;">${escapeHtml(t.noHp)}</div>
           </td>
           <td>
-            <span class="pill-service">${t.layanan.toUpperCase()}</span>
+            <span class="pill-service">${escapeHtml(formatLayanan(t.layanan))}</span>
           </td>
-          <td>${totalPcs} Pcs ${t.berat ? `(${t.berat} Kg)` : ''}</td>
+          <td>${totalPcs} Pcs ${t.berat ? `(${escapeHtml(t.berat)} Kg)` : ''}</td>
           <td>
             <div style="font-weight:800; color:var(--text-main);">${formatRupiah(t.totalHarga)}</div>
             <div>${getBayarBadge(t.statusBayar)}</div>
           </td>
           <td>${getStatusBadge(t.status)}</td>
+          <td>${renderFotoCell(t.id, items)}</td>
         </tr>
       `;
     })
     .join("");
+
+  tbody.querySelectorAll(".js-open-foto-nota").forEach((btn) => {
+    btn.addEventListener("click", () => openFotoNota(btn.getAttribute("data-trx-id")));
+  });
+}
+
+function renderFotoCell(trxId, items) {
+  const fotoItems = items.filter(hasFoto);
+
+  if (fotoItems.length === 0) {
+    return `<span class="foto-empty">Tanpa foto</span>`;
+  }
+
+  return `
+    <button type="button" class="btn btn-sm btn-outline-primary js-open-foto-nota" data-trx-id="${escapeHtml(trxId)}">
+      Lihat Foto (${fotoItems.length})
+    </button>
+  `;
+}
+
+function hasFoto(p) {
+  return Boolean(p && (p.foto || p.fotoThumb));
+}
+
+function formatLayanan(layanan) {
+  const key = String(layanan || "").toLowerCase();
+  const labels = {
+    cuci: "Cuci",
+    setrika: "Setrika",
+    "cuci-setrika": "Cuci + Setrika",
+    satuan: "Satuan"
+  };
+
+  return labels[key] || layanan || "-";
+}
+
+// Buka satu modal berisi semua pakaian pada satu nota
+function openFotoNota(trxId) {
+  const trx = masterTrx.find((t) => t.id === trxId);
+  if (!trx) {
+    showToast("Data transaksi tidak ditemukan.", "error");
+    return;
+  }
+
+  const items = pknByTrx.get(trxId) || masterPkn.filter((p) => p.transaksiId === trxId);
+  activeFotoNota = items;
+
+  const totalPcs = items.reduce((sum, p) => sum + (Number(p.jumlah) || 1), 0);
+  const fotoCount = items.filter(hasFoto).length;
+
+  const cardsHtml = items
+    .map((p, idx) => {
+      const thumbHtml = hasFoto(p)
+        ? `<button type="button" class="foto-nota-thumb js-foto-zoom" data-foto-index="${idx}" title="Perbesar foto ${escapeHtml(p.jenis)}">
+             <img src="${p.fotoThumb || p.foto}" alt="Foto ${escapeHtml(p.jenis)}" loading="lazy">
+           </button>`
+        : `<div class="foto-nota-thumb is-empty">Foto belum tersedia</div>`;
+
+      return `
+        <div class="foto-nota-card">
+          ${thumbHtml}
+          <div class="foto-nota-card-body">
+            <div class="foto-nota-title">
+              <span>${escapeHtml(p.jenis || "-")}</span>
+              <span class="foto-nota-qty">${Number(p.jumlah) || 1} pcs</span>
+            </div>
+            <div class="foto-nota-detail">
+              Warna: <strong>${escapeHtml(p.warna || "-")}</strong>
+              ${p.merek ? ` • Merek: <strong>${escapeHtml(p.merek)}</strong>` : ""}
+            </div>
+            <div class="foto-nota-kondisi">
+              <strong>Kondisi:</strong> ${escapeHtml(p.kondisi || "Baik tanpa catatan cacat")}
+            </div>
+          </div>
+        </div>
+      `;
+    })
+    .join("");
+
+  const contentHtml = `
+    <div class="foto-nota-header">
+      <div>
+        <div class="foto-nota-customer">${escapeHtml(trx.namaCustomer || "-")}</div>
+        <div class="foto-nota-meta">
+          ${escapeHtml(trx.noHp || "-")} • Nota ${escapeHtml(trx.id)} • ${formatTanggal(trx.tanggalMasuk, true)}
+        </div>
+      </div>
+      <div>${getStatusBadge(trx.status || "masuk")}</div>
+    </div>
+
+    <div class="foto-nota-summary">
+      <div>
+        <div class="foto-nota-summary-label">Layanan</div>
+        <div class="foto-nota-summary-value">${escapeHtml(formatLayanan(trx.layanan))}</div>
+      </div>
+      <div>
+        <div class="foto-nota-summary-label">Total Pakaian</div>
+        <div class="foto-nota-summary-value">${totalPcs} Pcs</div>
+      </div>
+      <div>
+        <div class="foto-nota-summary-label">Foto Tersedia</div>
+        <div class="foto-nota-summary-value">${fotoCount} dari ${items.length} item</div>
+      </div>
+      <div>
+        <div class="foto-nota-summary-label">Total Harga</div>
+        <div class="foto-nota-summary-value">${formatRupiah(trx.totalHarga)}</div>
+      </div>
+    </div>
+
+    ${
+      items.length
+        ? `<div class="foto-nota-grid">${cardsHtml}</div>`
+        : `<div class="foto-nota-empty">Belum ada rincian pakaian untuk nota ini.</div>`
+    }
+  `;
+
+  const waUrl = buildWhatsAppUrl(trx);
+
+  showModal(
+    `Dokumentasi Foto — ${escapeHtml(trx.id)}`,
+    contentHtml,
+    [
+      {
+        label: "Chat WhatsApp Pemilik",
+        className: "btn-success",
+        onClick: () => {
+          if (!waUrl) {
+            showToast("Nomor WhatsApp pelanggan belum tersedia.", "warning");
+            return;
+          }
+          window.open(waUrl, "_blank");
+        }
+      },
+      {
+        label: "Cetak Nota Transaksi",
+        className: "btn-outline-primary",
+        onClick: async () => {
+          const settings = (await db.pengaturan.get("app")) || {};
+          cetakNotaStruk(trx, items, settings);
+        }
+      },
+      {
+        label: "Tutup",
+        className: "btn-outline",
+        onClick: (close) => close()
+      }
+    ],
+    { size: "lg" }
+  );
+
+  document.querySelectorAll(".js-foto-zoom").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      openFotoLightbox(Number(btn.getAttribute("data-foto-index")));
+    });
+  });
+}
+
+function buildWhatsAppUrl(trx) {
+  const phone = String(trx.noHp || "").replace(/\D/g, "").replace(/^0/, "");
+  if (!phone) return "";
+
+  const text = `Halo Kak ${trx.namaCustomer || ""}, kami dari KIA Laundry terkait cucian Anda dengan No. Nota ${trx.id}.`;
+  return `https://wa.me/62${phone}?text=${encodeURIComponent(text)}`;
+}
+
+function openFotoLightbox(index) {
+  const p = activeFotoNota[index];
+  const src = p && (p.foto || p.fotoThumb);
+  if (!src) return;
+
+  const lightbox = document.getElementById("fotoLightbox");
+  const img = document.getElementById("fotoLightboxImg");
+  const caption = document.getElementById("fotoLightboxCaption");
+  const closeBtn = document.getElementById("fotoLightboxClose");
+
+  if (!lightbox || !img || !caption) return;
+
+  img.src = src;
+  img.alt = `Foto ${p.jenis || "pakaian"}`;
+  caption.textContent = [
+    p.jenis || "Pakaian",
+    p.warna || "-",
+    `${Number(p.jumlah) || 1} pcs`,
+    p.kondisi ? `Kondisi: ${p.kondisi}` : ""
+  ]
+    .filter(Boolean)
+    .join(" • ");
+
+  lightbox.hidden = false;
+  lightbox.setAttribute("aria-hidden", "false");
+  document.body.classList.add("foto-lightbox-open");
+
+  requestAnimationFrame(() => {
+    lightbox.classList.add("show");
+    if (closeBtn) closeBtn.focus();
+  });
+}
+
+function closeFotoLightbox() {
+  const lightbox = document.getElementById("fotoLightbox");
+  const img = document.getElementById("fotoLightboxImg");
+  if (!lightbox || lightbox.hidden) return;
+
+  lightbox.classList.remove("show");
+  lightbox.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("foto-lightbox-open");
+
+  setTimeout(() => {
+    if (lightbox.classList.contains("show")) return;
+    lightbox.hidden = true;
+    if (img) img.src = "";
+  }, 200);
+}
+
+function updateFilterBadge() {
+  const badge = document.getElementById("filterActiveBadge");
+  if (!badge) return;
+
+  const startVal = document.getElementById("filterDateStart")?.value || "";
+  const endVal = document.getElementById("filterDateEnd")?.value || "";
+  const statusVal = document.getElementById("filterStatusLaporan")?.value || "all";
+  const bayarVal = document.getElementById("filterBayarLaporan")?.value || "all";
+  const layananVal = document.getElementById("filterLayananLaporan")?.value || "all";
+
+  let activeCount = 0;
+  if (startVal !== defaultFilterDates.start) activeCount++;
+  if (endVal !== defaultFilterDates.end) activeCount++;
+  if (statusVal !== "all") activeCount++;
+  if (bayarVal !== "all") activeCount++;
+  if (layananVal !== "all") activeCount++;
+
+  badge.textContent = String(activeCount);
+  badge.hidden = activeCount === 0;
+}
+
+function setFilterPanelOpen(open) {
+  const panel = document.getElementById("reportFilterPanel");
+  const toggle = document.getElementById("btnToggleFilter");
+  if (!panel || !toggle) return;
+
+  panel.hidden = !open;
+  toggle.setAttribute("aria-expanded", open ? "true" : "false");
+  toggle.setAttribute(
+    "aria-label",
+    open ? "Sembunyikan filter laporan" : "Tampilkan filter laporan"
+  );
+  toggle.title = open ? "Sembunyikan filter" : "Filter laporan";
 }
 
 function setupLaporanEventListeners() {
@@ -152,6 +425,77 @@ function setupLaporanEventListeners() {
   inputs.forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.addEventListener("change", applyLaporanFilters);
+  });
+
+  const toggleBtn = document.getElementById("btnToggleFilter");
+  const closeBtn = document.getElementById("btnCloseFilter");
+  const resetBtn = document.getElementById("btnResetFilter");
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const panel = document.getElementById("reportFilterPanel");
+      setFilterPanelOpen(panel ? panel.hidden : false);
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => setFilterPanelOpen(false));
+  }
+
+  if (resetBtn) {
+    resetBtn.addEventListener("click", () => {
+      const elStart = document.getElementById("filterDateStart");
+      const elEnd = document.getElementById("filterDateEnd");
+      const elStatus = document.getElementById("filterStatusLaporan");
+      const elBayar = document.getElementById("filterBayarLaporan");
+      const elLayanan = document.getElementById("filterLayananLaporan");
+
+      if (elStart) elStart.value = defaultFilterDates.start;
+      if (elEnd) elEnd.value = defaultFilterDates.end;
+      if (elStatus) elStatus.value = "all";
+      if (elBayar) elBayar.value = "all";
+      if (elLayanan) elLayanan.value = "all";
+
+      applyLaporanFilters();
+      showToast("Filter dikembalikan ke periode bulan ini.", "info");
+    });
+  }
+
+  // Tutup panel saat klik di luar area filter
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("reportFilterPanel");
+    const toggle = document.getElementById("btnToggleFilter");
+    if (!panel || panel.hidden) return;
+    if (panel.contains(e.target) || (toggle && toggle.contains(e.target))) return;
+    setFilterPanelOpen(false);
+  });
+
+  // Lightbox
+  const lightbox = document.getElementById("fotoLightbox");
+  const lightboxClose = document.getElementById("fotoLightboxClose");
+
+  if (lightbox) {
+    lightbox.addEventListener("click", (e) => {
+      if (e.target === lightbox) closeFotoLightbox();
+    });
+  }
+
+  if (lightboxClose) {
+    lightboxClose.addEventListener("click", closeFotoLightbox);
+  }
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+
+    const lb = document.getElementById("fotoLightbox");
+    if (lb && !lb.hidden) {
+      closeFotoLightbox();
+      return;
+    }
+
+    const panel = document.getElementById("reportFilterPanel");
+    if (panel && !panel.hidden) setFilterPanelOpen(false);
   });
 
   // Tombol Export Opsi A (XLSX + ZIP Foto)

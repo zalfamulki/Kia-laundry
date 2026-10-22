@@ -38,6 +38,24 @@ async function updateStorageInfo() {
   if (elFill) {
     elFill.style.width = `${estimate.percent || 1}%`;
   }
+
+  // Status persistent storage: data lebih tahan terhadap pembersihan otomatis browser.
+  const persistStatus = await getPersistentStorageStatus();
+  const elPersist = document.getElementById("storagePersistStatus");
+  if (elPersist) {
+    elPersist.classList.remove("is-granted", "is-denied", "is-unsupported");
+
+    if (persistStatus === "granted") {
+      elPersist.textContent = "Storage permanen: aktif";
+      elPersist.classList.add("is-granted");
+    } else if (persistStatus === "denied") {
+      elPersist.textContent = "Storage permanen: belum aktif";
+      elPersist.classList.add("is-denied");
+    } else {
+      elPersist.textContent = "Storage permanen: tidak didukung browser";
+      elPersist.classList.add("is-unsupported");
+    }
+  }
 }
 
 function setupBackupHandlers() {

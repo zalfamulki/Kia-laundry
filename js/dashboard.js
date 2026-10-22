@@ -68,12 +68,12 @@ async function loadDashboardStats() {
   if (elBelumBayar) elBelumBayar.textContent = belumBayar.length;
 }
 
-// 2. Memuat daftar Pakaian Siap Diambil & Lewat Estimasi
+// 2. Memuat daftar Pakaian Siap Antar/Ambil & Lewat Estimasi
 async function loadAlerts() {
   const allTrx = await db.transaksi.toArray();
   const now = new Date();
 
-  // Siap Diambil
+  // Siap Antar/Ambil
   const listSiap = allTrx.filter((t) => t.status === "siap");
   const containerSiap = document.getElementById("listSiapDiambil");
 
@@ -81,7 +81,7 @@ async function loadAlerts() {
     if (listSiap.length === 0) {
       containerSiap.innerHTML = `
         <div class="empty-state" style="padding: 1.5rem 0;">
-          <p>Belum ada cucian yang siap diambil saat ini.</p>
+          <p>Belum ada cucian yang siap diantar/diambil saat ini.</p>
         </div>
       `;
     } else {
@@ -90,7 +90,7 @@ async function loadAlerts() {
         .map((t) => {
           const waUrl = `https://wa.me/62${(t.noHp || '').replace(/^0/, '')}?text=Halo%20Kak%20${encodeURIComponent(
             t.namaCustomer
-          )},%20cucian%20Anda%20dengan%20No%20${t.id}%20di%20KIA%20Laundry%20sudah%20SELESAI%20dan%20siap%20diambil.%20Total:%20${formatRupiah(
+          )},%20cucian%20Anda%20dengan%20No%20${t.id}%20di%20KIA%20Laundry%20sudah%20SELESAI%20dan%20siap%20diantar/diambil.%20Total:%20${formatRupiah(
             t.totalHarga
           )}.`;
 
@@ -105,7 +105,7 @@ async function loadAlerts() {
                   WA Notif
                 </a>
                 <button class="btn btn-sm btn-outline" onclick="tandaiDiambil('${t.id}')">
-                  Ambil
+                  Serahkan
                 </button>
               </div>
             </div>

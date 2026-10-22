@@ -31,6 +31,24 @@
   box-shadow: var(--shadow-sm);
 }
 
+.storage-status-pill.is-granted {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.storage-status-pill.is-denied {
+  background: #fffbeb;
+  color: #b45309;
+  border: 1px solid #fde68a;
+}
+
+.storage-status-pill.is-unsupported {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
 .storage-progress-bar {
   height: 12px;
   background: var(--bg-muted);

@@ -25,7 +25,12 @@
         </h1>
         <p>Filter data transaksi laundry, pantau performa omzet, dan unduh data beserta foto dokumentasi.</p>
       </div>
-      <div>
+      <div class="page-header-actions">
+        <button type="button" class="filter-icon-btn" id="btnToggleFilter" aria-expanded="false" aria-controls="reportFilterPanel" aria-label="Tampilkan filter laporan" title="Filter laporan">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          <span class="filter-icon-badge" id="filterActiveBadge" hidden>0</span>
+        </button>
+
         <a href="./transaksi.html" class="btn btn-yellow btn-sm">
           <span>+ Transaksi Baru</span>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -33,11 +38,17 @@
       </div>
     </div>
 
-    <!-- Filter Panel -->
-    <div class="report-filter-panel">
-      <div style="font-weight:800; font-size:1.05rem; margin-bottom:1rem; color:var(--text-main); display:flex; align-items:center; gap:0.5rem;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
-        Filter Periode & Kriteria
+    <!-- Filter Panel (collapsible) -->
+    <div class="report-filter-panel" id="reportFilterPanel" hidden>
+      <div class="filter-panel-header">
+        <div class="filter-panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+          Filter Periode & Kriteria
+        </div>
+
+        <button type="button" class="filter-panel-close" id="btnCloseFilter" aria-label="Tutup filter">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
 
       <div class="form-row">
@@ -58,7 +69,7 @@
             <option value="masuk">Masuk</option>
             <option value="dicuci">Dicuci</option>
             <option value="disetrika">Disetrika</option>
-            <option value="siap">Siap Diambil</option>
+            <option value="siap">Siap Antar/Ambil</option>
             <option value="diambil">Sudah Diambil</option>
           </select>
         </div>
@@ -83,6 +94,11 @@
             <option value="satuan">Cuci Satuan</option>
           </select>
         </div>
+      </div>
+
+      <div class="filter-panel-footer">
+        <span class="filter-panel-hint">Perubahan filter langsung diterapkan.</span>
+        <button type="button" class="btn btn-outline btn-sm" id="btnResetFilter">Reset</button>
       </div>
     </div>
 
@@ -171,17 +187,29 @@
               <th>Pakaian (Qty)</th>
               <th>Total & Pembayaran</th>
               <th>Status</th>
+              <th>Foto</th>
             </tr>
           </thead>
           <tbody id="laporanTableBody">
             <tr>
-              <td colspan="8" style="text-align:center; padding:2rem;">Memuat data laporan...</td>
+              <td colspan="9" style="text-align:center; padding:2rem;">Memuat data laporan...</td>
             </tr>
           </tbody>
         </table>
       </div>
     </div>
   </main>
+
+  <!-- Lightbox Pratinjau Foto Pakaian -->
+  <div class="foto-lightbox" id="fotoLightbox" hidden role="dialog" aria-modal="true" aria-label="Pratinjau foto pakaian">
+    <button type="button" class="foto-lightbox-close" id="fotoLightboxClose" aria-label="Tutup pratinjau">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <figure class="foto-lightbox-figure">
+      <img id="fotoLightboxImg" src="" alt="">
+      <figcaption id="fotoLightboxCaption"></figcaption>
+    </figure>
+  </div>
 
   <!-- Dynamic Footer -->
   <div id="siteFooter"></div>

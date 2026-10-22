@@ -518,6 +518,10 @@
   overflow: hidden;
 }
 
+.modal-container.modal-lg {
+  max-width: 880px;
+}
+
 .modal-backdrop.show .modal-container {
   transform: translateY(0) scale(1);
 }

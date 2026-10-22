@@ -15,14 +15,6 @@ db.version(1).stores({
 
 // Inisialisasi default settings toko (tanpa data dummy transaksi/pakaian)
 async function initDB() {
-  // Pembersihan otomatis data dummy versi lama jika ada
-  if (localStorage.getItem("kia_cleared_dummy_v2") !== "true") {
-    await db.transaksi.clear();
-    await db.pakaian.clear();
-    await db.customer.clear();
-    localStorage.setItem("kia_cleared_dummy_v2", "true");
-  }
-
   const settingsCount = await db.pengaturan.count();
   if (settingsCount === 0) {
     await db.pengaturan.put({
@@ -52,19 +44,59 @@ async function initDB() {
       modePreference: "auto" // 'auto', 'offline', 'online'
     });
   }
+
+  // Minta browser mempertahankan data agar tidak mudah dievict saat storage menipis.
+  // Tidak menghalangi aplikasi jika browser menolak atau tidak mendukung.
+  await requestPersistentStorage();
 }
 
-// Generate nomor transaksi berurutan: TRX-YYYYMMDD-XXX
+// Minta status persistent storage (tahan eviction browser)
+async function requestPersistentStorage() {
+  if (!navigator.storage || typeof navigator.storage.persist !== "function") {
+    return "unsupported";
+  }
+
+  try {
+    if (typeof navigator.storage.persisted === "function") {
+      const alreadyPersisted = await navigator.storage.persisted();
+      if (alreadyPersisted) return "granted";
+    }
+
+    const granted = await navigator.storage.persist();
+    return granted ? "granted" : "denied";
+  } catch (err) {
+    console.warn("Permintaan persistent storage gagal:", err);
+    return "denied";
+  }
+}
+
+// Baca status persistent storage tanpa meminta ulang
+async function getPersistentStorageStatus() {
+  if (!navigator.storage || typeof navigator.storage.persisted !== "function") {
+    return "unsupported";
+  }
+
+  try {
+    return (await navigator.storage.persisted()) ? "granted" : "denied";
+  } catch (err) {
+    console.warn("Gagal membaca status persistent storage:", err);
+    return "unsupported";
+  }
+}
+
+// Generate nomor transaksi berurutan: KIA-YYMM-XXX
+// Contoh: KIA-2610-001 (Oktober 2026, transaksi pertama bulan itu)
 async function generateNextTrxId() {
   const now = new Date();
-  const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-  const prefix = `TRX-${dateStr}-`;
-  
+  const year = String(now.getFullYear()).slice(-2);
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const prefix = `KIA-${year}${month}-`;
+
   const matches = await db.transaksi
     .where("id")
     .startsWith(prefix)
     .toArray();
-    
+
   let maxSeq = 0;
   for (const item of matches) {
     const parts = item.id.split("-");
@@ -73,7 +105,7 @@ async function generateNextTrxId() {
       maxSeq = seq;
     }
   }
-  
+
   const nextSeq = String(maxSeq + 1).padStart(3, "0");
   return `${prefix}${nextSeq}`;
 }

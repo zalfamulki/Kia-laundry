@@ -27,9 +27,9 @@ class ModeManager {
     if (!navMenu) return;
 
     // Sesuai rancangan K4 & bagian 8:
-    // Jika offline: navigasi menyusut ke 3 menu inti (Transaksi, Galeri, Export/Laporan)
+    // Jika offline: navigasi menyusut ke 3 menu inti (Transaksi, Laporan, Dashboard)
     // dengan link cadangan ke semua menu
-    const offlineCoreKeys = ["dashboard", "transaksi", "galeri", "laporan"];
+    const offlineCoreKeys = ["dashboard", "transaksi", "laporan"];
     const links = navMenu.querySelectorAll("li");
 
     links.forEach(li => {

@@ -46,3 +46,377 @@
   box-shadow: var(--shadow-sm);
   margin-bottom: 3rem;
 }
+
+/* ========================================================
+   FILTER ICON & COLLAPSIBLE PANEL
+   ======================================================== */
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter-icon-btn {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-medium);
+  background: #ffffff;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.filter-icon-btn:hover,
+.filter-icon-btn[aria-expanded="true"] {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.filter-icon-badge {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: var(--radius-full);
+  background: var(--status-danger);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #ffffff;
+}
+
+.filter-icon-badge[hidden] {
+  display: none;
+}
+
+.report-filter-panel[hidden] {
+  display: none;
+}
+
+.filter-panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.filter-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--text-main);
+}
+
+.filter-panel-close {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.filter-panel-close:hover {
+  background: var(--bg-muted);
+  color: var(--text-main);
+}
+
+.filter-panel-footer {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filter-panel-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ========================================================
+   TABEL LAPORAN — LAYANAN & TOMBOL FOTO
+   ======================================================== */
+.report-table-card .pill-service {
+  font-size: 0.72rem;
+  padding: 0.2rem 0.5rem;
+}
+
+.report-table-card .js-open-foto-nota {
+  white-space: nowrap;
+}
+
+.foto-empty {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ========================================================
+   MODAL PREVIEW FOTO PER NOTA
+   ======================================================== */
+.modal-container.modal-lg {
+  max-width: 860px;
+}
+
+.foto-nota-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.foto-nota-customer {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.foto-nota-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 0.2rem;
+}
+
+.foto-nota-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.foto-nota-summary-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #64748b;
+}
+
+.foto-nota-summary-value {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-top: 0.15rem;
+}
+
+.foto-nota-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.foto-nota-card {
+  background: #ffffff;
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.foto-nota-thumb {
+  display: block;
+  width: 100%;
+  height: 165px;
+  padding: 0;
+  border: 0;
+  background: #0f172a;
+  cursor: zoom-in;
+}
+
+.foto-nota-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.foto-nota-thumb:hover img {
+  opacity: 0.88;
+}
+
+.foto-nota-thumb.is-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: default;
+}
+
+.foto-nota-card-body {
+  padding: 0.7rem 0.8rem;
+}
+
+.foto-nota-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.foto-nota-qty {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.foto-nota-detail {
+  font-size: 0.78rem;
+  color: var(--text-body);
+  margin-top: 0.25rem;
+}
+
+.foto-nota-kondisi {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.55rem;
+  background: var(--bg-page);
+  border-left: 3px solid var(--accent-yellow);
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: var(--text-body);
+}
+
+.foto-nota-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 2rem 1rem;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+/* ========================================================
+   LIGHTBOX FOTO PENUH
+   ======================================================== */
+.foto-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 4000;
+  background: rgba(15, 23, 42, 0.94);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 1.5rem 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
+}
+
+.foto-lightbox[hidden] {
+  display: none;
+}
+
+.foto-lightbox.show {
+  opacity: 1;
+  visibility: visible;
+}
+
+body.foto-lightbox-open {
+  overflow: hidden;
+}
+
+.foto-lightbox-figure {
+  margin: 0;
+  max-width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.foto-lightbox-figure img {
+  max-width: min(92vw, 900px);
+  max-height: 78vh;
+  object-fit: contain;
+  border-radius: var(--radius-lg);
+  background: #020617;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+}
+
+.foto-lightbox-figure figcaption {
+  color: #e2e8f0;
+  font-size: 0.9rem;
+  text-align: center;
+  max-width: 700px;
+}
+
+.foto-lightbox-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 42px;
+  height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.foto-lightbox-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+@media (max-width: 640px) {
+  .foto-nota-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  .foto-nota-thumb {
+    height: 125px;
+  }
+
+  .modal-container.modal-lg .modal-footer {
+    flex-wrap: wrap;
+  }
+
+  .modal-container.modal-lg .modal-footer .btn {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .foto-lightbox {
+    padding: 4rem 0.75rem 1rem;
+  }
+
+  .foto-lightbox-figure img {
+    max-height: 72vh;
+  }
+}

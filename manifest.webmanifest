@@ -1,7 +1,7 @@
 {
   "name": "KIA Laundry - Clean & Fresh",
   "short_name": "KIA Laundry",
-  "description": "Aplikasi Manajemen Laundry & Galeri Pakaian KIA Laundry",
+  "description": "Aplikasi Manajemen Laundry, Laporan & Dokumentasi Foto Pakaian KIA Laundry",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f8fafc",

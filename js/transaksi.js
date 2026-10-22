@@ -385,6 +385,7 @@ async function handleSimpanTransaksi(e) {
   const tanggalMasuk = document.getElementById("tanggalMasuk").value;
   const estimasiSelesai = document.getElementById("estimasiSelesai").value;
   const statusBayar = document.getElementById("statusBayarSelect").value;
+  const metodePenyerahan = document.getElementById("metodePenyerahan")?.value || "antar";
   const totalHarga = Number(document.getElementById("totalHargaInput").value) || 0;
   const catatan = document.getElementById("catatanTrans")?.value.trim() || "";
 
@@ -413,6 +414,7 @@ async function handleSimpanTransaksi(e) {
       estimasiSelesai,
       status: "masuk",
       statusBayar,
+      metodePenyerahan,
       totalHarga,
       catatan,
       createdAt: new Date().toISOString(),
