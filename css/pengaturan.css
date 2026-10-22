@@ -1,0 +1,37 @@
+/* ========================================================
+   KIA LAUNDRY — Pengaturan Styles (pengaturan.css)
+   Profil toko, tabel tarif harga, preferensi mode, & reset
+   ======================================================== */
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.75rem;
+  margin-bottom: 2rem;
+}
+
+.danger-zone-card {
+  background: #fff;
+  border-radius: var(--radius-xl);
+  border: 1.5px solid #fecaca;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-top: 2rem;
+}
+
+.danger-zone-header {
+  background: #fef2f2;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #fee2e2;
+  color: #991b1b;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+@media (max-width: 992px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <title>Monitoring Proses Cucian — KIA Laundry</title>
+
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/komponen.css">
+  <link rel="stylesheet" href="../css/proses.css">
+</head>
+<body>
+
+  <!-- Dynamic Header Navigation -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1>
+          <span>Alur & Status Cucian</span>
+          <span class="badge badge-setrika">Kanban Board</span>
+        </h1>
+        <p>Pantau status pakaian dari masuk hingga siap diambil, dengan verifikasi checklist saat penyerahan.</p>
+      </div>
+      <div>
+        <a href="./transaksi.html" class="btn btn-yellow btn-sm">
+          <span>+ Transaksi Baru</span>
+          <span class="btn-arrow-icon">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Papan Kanban 5 Kolom Sesuai Rancangan -->
+    <div class="kanban-board">
+
+      <!-- Kolom 1: Masuk -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="badge-dot" style="background:var(--status-masuk);"></span>
+            <span>Masuk</span>
+          </div>
+          <span class="column-count" id="count_masuk">0</span>
+        </div>
+        <div id="col_masuk"></div>
+      </div>
+
+      <!-- Kolom 2: Dicuci -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="badge-dot" style="background:var(--status-cuci);"></span>
+            <span>Dicuci</span>
+          </div>
+          <span class="column-count" id="count_dicuci">0</span>
+        </div>
+        <div id="col_dicuci"></div>
+      </div>
+
+      <!-- Kolom 3: Disetrika -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="badge-dot" style="background:var(--status-setrika);"></span>
+            <span>Disetrika</span>
+          </div>
+          <span class="column-count" id="count_disetrika">0</span>
+        </div>
+        <div id="col_disetrika"></div>
+      </div>
+
+      <!-- Kolom 4: Siap Diambil -->
+      <div class="kanban-column" style="background:#ecfdf5; border-color:#a7f3d0;">
+        <div class="column-header" style="border-bottom-color:#a7f3d0;">
+          <div class="column-title" style="color:#065f46;">
+            <span class="badge-dot" style="background:var(--status-siap);"></span>
+            <span>Siap Diambil</span>
+          </div>
+          <span class="column-count" id="count_siap" style="background:#10b981; color:#fff;">0</span>
+        </div>
+        <div id="col_siap"></div>
+      </div>
+
+      <!-- Kolom 5: Selesai / Diambil -->
+      <div class="kanban-column">
+        <div class="column-header">
+          <div class="column-title">
+            <span class="badge-dot" style="background:var(--status-diambil);"></span>
+            <span>Selesai</span>
+          </div>
+          <span class="column-count" id="count_diambil">0</span>
+        </div>
+        <div id="col_diambil"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Dynamic Footer -->
+  <div id="siteFooter"></div>
+
+  <!-- Scripts -->
+  <script src="../lib/dexie.min.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/mode.js"></script>
+  <script src="../js/proses.js"></script>
+</body>
+</html>

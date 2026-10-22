@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <title>Backup & Restore Database — KIA Laundry</title>
+
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/komponen.css">
+  <link rel="stylesheet" href="../css/backup.css">
+</head>
+<body>
+
+  <!-- Dynamic Navigation -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1>
+          <span>Backup & Restore Data</span>
+          <span class="badge badge-masuk">IndexedDB Lokal</span>
+        </h1>
+        <p>Amankan seluruh rekaman transaksi dan foto pakaian ke file JSON untuk dipindahkan antar perangkat.</p>
+      </div>
+    </div>
+
+    <!-- Peringatan Penting Sesuai Rancangan -->
+    <div class="warning-callout">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <div>
+        <h4 style="font-size:1.05rem; font-weight:800; color:#92400e; margin-bottom:0.25rem;">
+          Data Hanya Tersimpan di Perangkat Ini (Lokal Browser)
+        </h4>
+        <p style="font-size:0.9rem; color:#78350f; line-height:1.5;">
+          Aplikasi KIA Laundry berjalan 100% tanpa database server untuk kecepatan dan privasi maksimal. 
+          Menghapus cache atau riwayat peramban web dapat menghapus data jika belum di-backup. 
+          <strong>Disarankan untuk mengunduh Backup JSON secara rutin setiap tutup toko.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Storage Quota Meter -->
+    <div class="storage-meter-box">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+        <div>
+          <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-main);">
+            Status Penyimpanan Browser
+          </h4>
+          <p id="storageUsageText" style="font-size:0.875rem; color:var(--text-muted); margin-top:0.2rem;">
+            Menghitung estimasi kapasitas...
+          </p>
+        </div>
+        <div style="display:flex; gap:0.65rem;">
+          <span class="pill-service" id="backupTrxCount">0 Transaksi</span>
+          <span class="pill-service" id="backupPknCount">0 Foto Pakaian</span>
+          <span class="pill-service" id="backupCusCount">0 Pelanggan</span>
+        </div>
+      </div>
+
+      <div class="storage-progress-bar">
+        <div class="storage-progress-fill" id="storageProgressFill" style="width: 5%;"></div>
+      </div>
+    </div>
+
+    <!-- Grid Backup & Restore -->
+    <div class="backup-grid">
+      <!-- Kartu 1: Unduh Backup JSON -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            1. Unduh Cadangan (Backup JSON)
+          </h3>
+        </div>
+        <div class="card-body">
+          <p style="font-size:0.9rem; color:var(--text-body); line-height:1.6; margin-bottom:1.25rem;">
+            Ekspor seluruh tabel transaksi, data pelanggan, konfigurasi harga, dan semua gambar foto pakaian yang terkompresi ke dalam satu file berkas <code>.json</code>.
+          </p>
+
+          <button type="button" class="btn btn-primary btn-lg" id="btnDownloadBackup" style="width:100%;">
+            <span>Unduh Cadangan Database Sekarang</span>
+            <span class="btn-arrow-icon">↓</span>
+          </button>
+        </div>
+        <div class="card-footer" style="font-size:0.8rem; color:var(--text-muted);">
+          File dapat disimpan di Google Drive, flashdisk, atau dikirim via WhatsApp antar kasir.
+        </div>
+      </div>
+
+      <!-- Kartu 2: Pulihkan Data (Restore JSON) -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            2. Pulihkan Data (Restore JSON)
+          </h3>
+        </div>
+        <div class="card-body">
+          <p style="font-size:0.9rem; color:var(--text-body); line-height:1.6; margin-bottom:1rem;">
+            Pilih file cadangan <code>.json</code> yang pernah diunduh sebelumnya untuk mengembalikan atau memindahkan data ke perangkat ini.
+          </p>
+
+          <div style="background:var(--bg-page); padding:0.85rem; border-radius:10px; margin-bottom:1.25rem; border:1px solid var(--border-light);">
+            <div style="font-size:0.85rem; font-weight:700; margin-bottom:0.5rem; color:var(--text-main);">Pilihan Pemulihan:</div>
+            <label style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.4rem; font-size:0.85rem; cursor:pointer;">
+              <input type="radio" name="restoreMode" value="merge" checked>
+              <strong>Gabungkan Data (Merge)</strong> — data lama tetap ada, data baru ditambahkan.
+            </label>
+            <label style="display:flex; align-items:center; gap:0.5rem; font-size:0.85rem; cursor:pointer;">
+              <input type="radio" name="restoreMode" value="replace">
+              <strong style="color:var(--status-danger);">Ganti Semua Data (Replace)</strong> — timpa seluruh data saat ini.
+            </label>
+          </div>
+
+          <input type="file" id="restoreFileInput" accept=".json" style="display:none;">
+          <button type="button" class="btn btn-yellow btn-lg" id="btnTriggerRestore" style="width:100%;">
+            <span>Pilih File JSON & Pulihkan Data</span>
+            <span class="btn-arrow-icon">↑</span>
+          </button>
+        </div>
+        <div class="card-footer" style="font-size:0.8rem; color:var(--text-muted);">
+          Browser akan memverifikasi struktur JSON sebelum data dimasukkan ke IndexedDB.
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Dynamic Footer -->
+  <div id="siteFooter"></div>
+
+  <!-- Scripts -->
+  <script src="../lib/dexie.min.js"></script>
+  <script src="../lib/xlsx.full.min.js"></script>
+  <script src="../lib/jszip.min.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/mode.js"></script>
+  <script src="../js/export.js"></script>
+  <script src="../js/backup.js"></script>
+  <script src="../js/backup-page.js"></script>
+</body>
+</html>

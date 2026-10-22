@@ -1,0 +1,141 @@
+/* ========================================================
+   KIA LAUNDRY — Proses Status Styles (proses.css)
+   Kanban columns, timeline cards, & item checklist modal
+   ======================================================== */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  overflow-x: auto;
+  padding-bottom: 2rem;
+}
+
+.kanban-column {
+  background: var(--bg-muted);
+  border-radius: var(--radius-xl);
+  padding: 1.15rem;
+  border: 1px solid var(--border-light);
+  min-width: 270px;
+}
+
+.column-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--border-medium);
+}
+
+.column-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.column-count {
+  background: #ffffff;
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-main);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Kanban Cards */
+.kanban-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.85rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.kanban-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.kanban-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.45rem;
+}
+
+.kanban-customer {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.kanban-items-preview {
+  display: flex;
+  gap: 0.35rem;
+  overflow-x: auto;
+  margin: 0.65rem 0;
+  padding-bottom: 0.25rem;
+}
+
+.kanban-item-thumb {
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  object-fit: cover;
+  background: var(--bg-page);
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.kanban-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.85rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--border-light);
+}
+
+/* Checklist Pakaian Sebelum Diambil */
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  background: var(--bg-page);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--border-light);
+  cursor: pointer;
+  user-select: none;
+}
+
+.checklist-item.checked {
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
+
+.checklist-checkbox {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  accent-color: #10b981;
+}
+
+@media (max-width: 1200px) {
+  .kanban-board {
+    display: flex;
+    overflow-x: auto;
+  }
+}

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <meta name="description" content="Aplikasi KIA Laundry Clean & Fresh — Sistem Manajemen Laundry & Dokumentasi Foto Pakaian Tanpa Server.">
+  <title>KIA Laundry — Clean & Fresh | Sistem Laundry & Foto Pakaian</title>
+
+  <!-- PWA & Icons -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" type="image/png" href="./assets/logo.png">
+
+  <!-- Stylesheets -->
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/komponen.css">
+  <link rel="stylesheet" href="./css/dashboard.css">
+</head>
+<body>
+
+  <!-- Dynamic Navigation Injected by ui.js -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+
+    <!-- 1. HERO SECTION (Terinspirasi Layout Maya Web Studio: Kuning Cerah, Ramah, Human-Crafted) -->
+    <section class="hero-section">
+      <div class="hero-content">
+        <div class="hero-pill">
+          <span>✨</span>
+          <span>KIA LAUNDRY • CLEAN & FRESH</span>
+        </div>
+
+        <h1 class="hero-title">
+          Mencuci & Menjaga Pakaian Tetap Bersih <span class="highlight-yellow">and Fresh <span class="sun-doodle">☀️</span></span>
+        </h1>
+
+        <p class="hero-desc">
+          Sistem operasional laundry modern dengan pencatatan & foto digital setiap potong pakaian. 
+          Pakaian pelanggan aman, tidak pernah tertukar atau terlupa, siap pakai kapan saja.
+        </p>
+
+        <div class="hero-buttons">
+          <a href="./pages/transaksi.html" class="btn btn-yellow btn-lg">
+            <span>+ Transaksi Baru</span>
+            <span class="btn-arrow-icon">→</span>
+          </a>
+
+          <a href="./pages/galeri.html" class="btn btn-outline btn-lg">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+            <span>Galeri Pakaian</span>
+          </a>
+        </div>
+
+        <div class="hero-note">
+          <span class="handwriting">✓ Layanan antar jemput & dokumentasi foto siap sedia!</span>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-blob-bg"></div>
+
+        <div class="hero-image-wrapper">
+          <div class="hero-badge-floating">
+            <div class="badge-num">100%</div>
+            <div>
+              <div style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted); font-weight:700;">Jaminan</div>
+              <div style="font-size:0.85rem; font-weight:800;">Tidak Tertukar</div>
+            </div>
+          </div>
+
+          <div class="hero-main-card">
+            <div style="display:flex; align-items:center; gap:0.85rem; margin-bottom:1rem;">
+              <img src="./assets/logo.png" alt="Logo" style="width:58px; height:58px; border-radius:50%; box-shadow:0 4px 10px rgba(0,0,0,0.1);">
+              <div>
+                <h4 style="font-size:1.1rem; font-weight:800; color:var(--text-main);">KIA LAUNDRY</h4>
+                <p style="font-size:0.825rem; color:var(--primary); font-weight:700;">Clean & Fresh — Semua Bisa</p>
+              </div>
+            </div>
+
+            <div style="background:var(--bg-muted); border-radius:12px; padding:0.85rem; font-size:0.85rem; margin-bottom:1rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem;">
+                <span style="color:var(--text-muted);">Sistem Penyimpanan:</span>
+                <strong style="color:#059669;">IndexedDB (Lokal & Offline)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text-muted);">Antar Jemput:</span>
+                <strong style="color:var(--primary);">Aktif Setiap Hari</strong>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:0.5rem;">
+              <a href="https://wa.me/6285179591769" target="_blank" class="btn btn-sm btn-yellow" style="flex:1;">
+                WA: 0851-7959-1769
+              </a>
+              <a href="https://wa.me/628112291769" target="_blank" class="btn btn-sm btn-outline" style="flex:1;">
+                WA: 0811-2291-769
+              </a>
+            </div>
+          </div>
+
+          <div class="hero-badge-bottom">
+            <span>●</span>
+            <span>Kamera Foto Digital Aktif</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. QUICK TRACKING STATUS (Pelanggan / Kasir bisa langsung cek nomor nota) -->
+    <section class="tracking-card">
+      <div class="tracking-title">
+        <div class="stat-icon blue" style="width:44px; height:44px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </div>
+        <div>
+          <h3>Cek Status Cucian Pelanggan</h3>
+          <p>Masukkan Nomor Transaksi (TRX) atau No. WhatsApp untuk melacak progres</p>
+        </div>
+      </div>
+
+      <form class="tracking-form" id="trackingForm">
+        <input type="text" class="form-control" id="trackingInput" placeholder="Contoh: TRX-20261022-001 atau 0812xxxx" required>
+        <button type="submit" class="btn btn-primary">
+          <span>Lacak</span>
+          <span class="btn-arrow-icon">→</span>
+        </button>
+      </form>
+    </section>
+
+    <!-- 3. OPERATIONAL METRICS (Ringkasan Cepat Hari Ini) -->
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.25rem;">
+        <div>
+          <h2 style="font-size:1.5rem; font-weight:800; color:var(--text-main);">Ringkasan Operasional</h2>
+          <p style="font-size:0.875rem; color:var(--text-muted);">Aktivitas pengerjaan laundry hari ini di perangkat Anda</p>
+        </div>
+        <a href="./pages/laporan.html" class="btn btn-sm btn-outline">Lihat Laporan Lengkap →</a>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Transaksi Masuk</div>
+            <div class="stat-value" id="statTrxHariIni">0</div>
+            <div class="stat-sub">Hari ini</div>
+          </div>
+          <div class="stat-icon blue">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Pakaian Diproses</div>
+            <div class="stat-value" id="statPakaianProses">0</div>
+            <div class="stat-sub">Sedang cuci / setrika</div>
+          </div>
+          <div class="stat-icon yellow">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Siap Diambil</div>
+            <div class="stat-value" id="statSiapDiambil">0</div>
+            <div class="stat-sub">Siap diserahkan</div>
+          </div>
+          <div class="stat-icon green">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-info">
+            <div class="stat-label">Omzet Masuk</div>
+            <div class="stat-value" id="statOmzetHariIni" style="font-size:1.45rem;">Rp 0</div>
+            <div class="stat-sub"><span id="statBelumBayar">0</span> order belum lunas</div>
+          </div>
+          <div class="stat-icon purple">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. OPERATIONAL ALERTS (Siap Diambil vs Lewat Target) -->
+    <section class="dashboard-grid">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <span class="badge-dot" style="background:#10b981; width:10px; height:10px;"></span>
+            Cucian Siap Diambil
+          </h3>
+          <a href="./pages/proses.html" class="btn btn-sm btn-ghost">Semua Proses →</a>
+        </div>
+        <div class="card-body" id="listSiapDiambil">
+          <div style="text-align:center; padding:1.5rem; color:var(--text-muted);">Memuat data cucian siap...</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title" style="color:var(--status-danger);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Perlu Perhatian (Lewat Target)
+          </h3>
+          <span class="badge badge-belum">Prioritas</span>
+        </div>
+        <div class="card-body" id="listOverdue">
+          <div style="text-align:center; padding:1.5rem; color:var(--text-muted);">Memeriksa cucian tertunda...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. PACKAGES & PRICING (Sesuai Referensi Maya: Simple Packages. Clean Clothes) -->
+    <section style="padding: 2rem 0;">
+      <div class="section-title-center">
+        <span class="section-tag">Layanan & Harga Transparan</span>
+        <h2 class="section-heading">Simple Packages. <span style="font-family:'Caveat', cursive; color:var(--primary); font-size:2.8rem;">Clean Clothes.</span></h2>
+        <p style="color:var(--text-muted); font-size:1rem;">Pilihan layanan fleksibel untuk kebutuhan pakaian sehari-hari hingga perawatan khusus.</p>
+      </div>
+
+      <div class="packages-grid">
+        <!-- Paket 1: Starter -->
+        <div class="package-card">
+          <div class="package-header">
+            <div class="package-name">
+              <span>Cuci Kering</span>
+              <span class="pill-service">Ekonomis</span>
+            </div>
+            <div class="package-price">
+              Rp 6.000 <span>/ kg</span>
+            </div>
+          </div>
+          <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">Pilihan tepat untuk pakaian santai, sprei, dan handuk harian.</p>
+          <ul class="package-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Cuci bersih deterjen premium</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Pengeringan mesin 100%</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Foto dokumentasi pakaian</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Lipat rapi & plastik packing</li>
+          </ul>
+          <a href="./pages/transaksi.html" class="btn btn-outline" style="width:100%;">Pilih Layanan</a>
+        </div>
+
+        <!-- Paket 2: Most Popular (Kuning Cerah seperti Maya) -->
+        <div class="package-card popular">
+          <div class="popular-badge">⭐ Paling Diminati Pelanggan</div>
+          <div class="package-header" style="margin-top:0.5rem;">
+            <div class="package-name">
+              <span>Cuci + Setrika Uap</span>
+              <span class="pill-service" style="background:#fef3c7; color:#92400e;">Komplit</span>
+            </div>
+            <div class="package-price">
+              Rp 9.000 <span>/ kg</span>
+            </div>
+          </div>
+          <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">Layanan terlengkap pakaian kerja, baju rapi, wangi tahan lama.</p>
+          <ul class="package-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Cuci higienis anti kuman</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Setrika uap presisi & licin</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Pewangi premium tahan 14 hari</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Foto kondisi awal & hanger rapi</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Layanan antar jemput cepat</li>
+          </ul>
+          <a href="./pages/transaksi.html" class="btn btn-yellow" style="width:100%;">Mulai Transaksi →</a>
+        </div>
+
+        <!-- Paket 3: Satuan / Premium -->
+        <div class="package-card">
+          <div class="package-header">
+            <div class="package-name">
+              <span>Cuci Satuan</span>
+              <span class="pill-service">Special Care</span>
+            </div>
+            <div class="package-price">
+              Rp 15.000+ <span>/ pcs</span>
+            </div>
+          </div>
+          <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">Perawatan spesial untuk jas, bedcover, selimut, gaun & sepatu.</p>
+          <ul class="package-features">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Treatment kain individual</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Pembersihan noda khusus</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Cover pakaian pelindung debu</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Foto detail sebelum & sesudah</li>
+          </ul>
+          <a href="./pages/transaksi.html" class="btn btn-outline" style="width:100%;">Pilih Satuan</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. TESTIMONIALS (Happy Clients. Real Results.) -->
+    <section>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:2rem; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <span class="section-tag">Kepuasan Pelanggan</span>
+          <h2 style="font-size:2rem; font-weight:800; color:var(--text-main);">
+            Happy Clients. <span style="font-family:'Caveat', cursive; color:var(--primary); font-size:2.5rem;">Real Results.</span>
+          </h2>
+        </div>
+        <div style="display:flex; align-items:center; gap:0.5rem;">
+          <span style="font-size:1.5rem; color:#f59e0b;">★★★★★</span>
+          <span style="font-weight:700; color:var(--text-main);">4.9/5 dari 850+ Pelanggan</span>
+        </div>
+      </div>
+
+      <div class="testimonials-grid">
+        <div class="testimonial-card">
+          <div class="quote-icon">“</div>
+          <p class="testimonial-text">
+            Sistem foto pakaiannya luar biasa! Dulu sering khawatir baju kerja tertukar di tempat laundry lain, 
+            semenjak langganan di KIA Laundry semua terpantau rapi dan ada bukti fotonya di nota.
+          </p>
+          <div class="client-meta">
+            <div class="client-avatar">BS</div>
+            <div>
+              <div style="font-weight:800; color:var(--text-main);">Budi Santoso</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">Pelanggan Antar-Jemput Ciganitri</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-card">
+          <div class="quote-icon">“</div>
+          <p class="testimonial-text">
+            Wanginya tahan lama dan setrikanya benar-benar licin tanpa lipatan berlebih. 
+            Layanan antar jemputnya juga on-time dan respon admin via WhatsApp sangat ramah!
+          </p>
+          <div class="client-meta">
+            <div class="client-avatar" style="background:#fce7f3; color:#db2777;">SR</div>
+            <div>
+              <div style="font-weight:800; color:var(--text-main);">Siti Rahmawati</div>
+              <div style="font-size:0.8rem; color:var(--text-muted);">Ibu Rumah Tangga & Entrepreneur</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Dynamic Footer Injected by ui.js -->
+  <div id="siteFooter"></div>
+
+  <!-- Vendor Libraries & Scripts -->
+  <script src="./lib/dexie.min.js"></script>
+  <script src="./js/db.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/mode.js"></script>
+  <script src="./js/dashboard.js"></script>
+</body>
+</html>

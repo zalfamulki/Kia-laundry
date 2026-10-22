@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <title>Data Customer — KIA Laundry</title>
+
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/komponen.css">
+  <link rel="stylesheet" href="../css/customer.css">
+</head>
+<body>
+
+  <!-- Dynamic Navigation -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1>
+          <span>Database Pelanggan</span>
+          <span class="badge badge-lunas" id="customerCountBadge">0 Pelanggan</span>
+        </h1>
+        <p>Kelola kontak pelanggan setia KIA Laundry, riwayat belanja, dan pakaian favorit.</p>
+      </div>
+      <div>
+        <a href="./transaksi.html" class="btn btn-yellow btn-sm">
+          <span>+ Transaksi Baru</span>
+          <span class="btn-arrow-icon">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Metrik Pelanggan -->
+    <div class="customer-stats-bar">
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Total Pelanggan</div>
+          <div class="stat-value" id="metricTotalCustomer">0</div>
+          <div class="stat-sub">Terdaftar di browser</div>
+        </div>
+        <div class="stat-icon blue">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Pelanggan Repeat</div>
+          <div class="stat-value" id="metricRepeatCustomer">0</div>
+          <div class="stat-sub">Order lebih dari 1x</div>
+        </div>
+        <div class="stat-icon yellow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-info">
+          <div class="stat-label">Akumulasi Belanja</div>
+          <div class="stat-value" id="metricTotalBelanja" style="font-size:1.45rem;">Rp 0</div>
+          <div class="stat-sub">Total transaksi pelanggan</div>
+        </div>
+        <div class="stat-icon green">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div style="margin-bottom: 1.5rem; max-width: 480px;">
+      <input type="text" id="searchCustomerInput" class="form-control" placeholder="Cari nama pelanggan, nomor WhatsApp, atau alamat...">
+    </div>
+
+    <!-- Tabel Pelanggan -->
+    <div class="customer-table-card">
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th style="width: 50px;">No</th>
+              <th>Nama Pelanggan & Alamat</th>
+              <th>No. WhatsApp</th>
+              <th>Frekuensi Order</th>
+              <th>Total Belanja</th>
+              <th style="text-align: right;">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="customerTableBody">
+            <tr>
+              <td colspan="6" style="text-align:center; padding:2rem;">Memuat daftar pelanggan...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Dynamic Footer -->
+  <div id="siteFooter"></div>
+
+  <!-- Scripts -->
+  <script src="../lib/dexie.min.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/mode.js"></script>
+  <script src="../js/customer.js"></script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <title>Pengaturan Toko & Harga — KIA Laundry</title>
+
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/komponen.css">
+  <link rel="stylesheet" href="../css/pengaturan.css">
+</head>
+<body>
+
+  <!-- Dynamic Navigation -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1>
+          <span>Pengaturan KIA Laundry</span>
+          <span class="badge badge-masuk">Konfigurasi</span>
+        </h1>
+        <p>Atur identitas nota struk, daftar tarif layanan kiloan & satuan, dan preferensi mode offline/online.</p>
+      </div>
+    </div>
+
+    <form id="formPengaturanToko">
+      <div class="settings-grid">
+
+        <!-- Kolom Kiri: Profil Laundry & Mode -->
+        <div>
+          <!-- 1. Identitas Laundry -->
+          <div class="card" style="margin-bottom: 1.5rem;">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                1. Identitas Laundry (Header Struk)
+              </h3>
+            </div>
+            <div class="card-body">
+              <div class="form-group">
+                <label class="form-label" for="cfgNamaLaundry">Nama Laundry</label>
+                <input type="text" id="cfgNamaLaundry" class="form-control" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="cfgSlogan">Slogan / Tagline</label>
+                <input type="text" id="cfgSlogan" class="form-control">
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="cfgAlamat">Alamat Lengkap Outlet</label>
+                <input type="text" id="cfgAlamat" class="form-control">
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfgHp1">Nomor WhatsApp 1</label>
+                  <input type="text" id="cfgHp1" class="form-control">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cfgHp2">Nomor WhatsApp 2 (Antar-Jemput)</label>
+                  <input type="text" id="cfgHp2" class="form-control">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Preferensi Mode Online & Offline -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                2. Preferensi Mode Jaringan (K4 & Bagian 8)
+              </h3>
+            </div>
+            <div class="card-body">
+              <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:1rem;">
+                Tentukan bagaimana aplikasi menampilkan menu saat jaringan tidak stabil:
+              </p>
+
+              <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                <label style="display:flex; align-items:flex-start; gap:0.65rem; cursor:pointer;">
+                  <input type="radio" name="cfgModePref" value="auto" checked style="margin-top:0.25rem;">
+                  <div>
+                    <strong style="font-size:0.9rem;">Otomatis (Rekomendasi)</strong>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Mendeteksi koneksi internet browser secara live.</div>
+                  </div>
+                </label>
+
+                <label style="display:flex; align-items:flex-start; gap:0.65rem; cursor:pointer;">
+                  <input type="radio" name="cfgModePref" value="offline" style="margin-top:0.25rem;">
+                  <div>
+                    <strong style="font-size:0.9rem;">Kunci Mode Offline</strong>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Navigasi fokus ke menu inti (Transaksi, Galeri, Export) tanpa tergantung sinyal.</div>
+                  </div>
+                </label>
+
+                <label style="display:flex; align-items:flex-start; gap:0.65rem; cursor:pointer;">
+                  <input type="radio" name="cfgModePref" value="online" style="margin-top:0.25rem;">
+                  <div>
+                    <strong style="font-size:0.9rem;">Kunci Mode Online</strong>
+                    <div style="font-size:0.8rem; color:var(--text-muted);">Semua menu navigasi selalu terbuka.</div>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Tarif Harga Layanan -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                3. Tarif Layanan Kiloan & Satuan
+              </h3>
+            </div>
+            <div class="card-body">
+              <div style="font-weight:700; font-size:0.9rem; color:var(--primary); margin-bottom:0.75rem;">
+                Tarif Kiloan (Per Kg):
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfgHargaCuciSetrika">Cuci + Setrika (Rp)</label>
+                  <input type="number" id="cfgHargaCuciSetrika" class="form-control" step="500">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cfgHargaCuci">Cuci Kering Saja (Rp)</label>
+                  <input type="number" id="cfgHargaCuci" class="form-control" step="500">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="cfgHargaSetrika">Setrika Saja (Rp)</label>
+                  <input type="number" id="cfgHargaSetrika" class="form-control" step="500">
+                </div>
+              </div>
+
+              <div style="font-weight:700; font-size:0.9rem; color:var(--primary); margin:1.25rem 0 0.75rem;">
+                Tarif Satuan Spesial (Per Pcs):
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatKemeja">Kemeja</label>
+                  <input type="number" id="cfgSatKemeja" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatKaos">Kaos</label>
+                  <input type="number" id="cfgSatKaos" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatCelana">Celana Bahan</label>
+                  <input type="number" id="cfgSatCelana" class="form-control" step="500">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatJeans">Celana Jeans</label>
+                  <input type="number" id="cfgSatJeans" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatJaket">Jaket / Hoodie</label>
+                  <input type="number" id="cfgSatJaket" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatJas">Jas Formal</label>
+                  <input type="number" id="cfgSatJas" class="form-control" step="500">
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatSelimut">Selimut</label>
+                  <input type="number" id="cfgSatSelimut" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatBedcover">Bedcover</label>
+                  <input type="number" id="cfgSatBedcover" class="form-control" step="500">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="cfgSatSepatu">Sepatu</label>
+                  <input type="number" id="cfgSatSepatu" class="form-control" step="500">
+                </div>
+              </div>
+
+            </div>
+
+            <div class="card-footer">
+              <button type="submit" class="btn btn-yellow btn-lg" style="width:100%;">
+                <span>Simpan Seluruh Pengaturan</span>
+                <span class="btn-arrow-icon">✓</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Danger Zone: Reset Data -->
+    <div class="danger-zone-card">
+      <div class="danger-zone-header">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span>Zona Berbahaya: Reset Database</span>
+      </div>
+      <div style="padding:1.5rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+        <div>
+          <strong style="color:#991b1b; font-size:0.95rem;">Hapus Seluruh Data Transaksi & Foto Pakaian</strong>
+          <p style="font-size:0.85rem; color:var(--text-muted); margin-top:0.2rem;">
+            Tindakan ini tidak dapat dibatalkan. Pastikan Anda telah mengunduh Backup JSON terlebih dahulu.
+          </p>
+        </div>
+        <button type="button" class="btn btn-danger" id="btnResetData">
+          Kosongkan Semua Data
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Dynamic Footer -->
+  <div id="siteFooter"></div>
+
+  <!-- Scripts -->
+  <script src="../lib/dexie.min.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/mode.js"></script>
+  <script src="../js/pengaturan.js"></script>
+</body>
+</html>

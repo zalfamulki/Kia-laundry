@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0284c7">
+  <title>Galeri Pakaian & Dokumentasi Foto — KIA Laundry</title>
+
+  <link rel="icon" type="image/png" href="../assets/logo.png">
+  <link rel="stylesheet" href="../css/base.css">
+  <link rel="stylesheet" href="../css/komponen.css">
+  <link rel="stylesheet" href="../css/galeri.css">
+</head>
+<body>
+
+  <!-- Dynamic Navigation -->
+  <div id="siteHeader"></div>
+
+  <main class="main-wrapper">
+    <div class="page-header">
+      <div class="page-title-group">
+        <h1>
+          <span>Galeri Foto Pakaian</span>
+          <span class="badge badge-cuci" id="galeriCountBadge">0 Pakaian</span>
+        </h1>
+        <p>Cari dan pantau fisik setiap potong pakaian pelanggan agar tidak ada yang tertukar atau terlupa.</p>
+      </div>
+      <div>
+        <a href="./transaksi.html" class="btn btn-yellow btn-sm">
+          <span>+ Transaksi Masuk</span>
+          <span class="btn-arrow-icon">→</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Filter & Pencarian Bar -->
+    <section class="filter-bar">
+      <div class="filter-row-top">
+        <div class="search-input-wrapper">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchPakaianInput" class="form-control" placeholder="Cari nama customer, no WA, jenis baju, warna, merek, atau no nota...">
+        </div>
+      </div>
+
+      <div class="filter-row-bottom">
+        <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">Filter:</div>
+
+        <select id="filterStatus" class="form-select filter-select">
+          <option value="all">Semua Status</option>
+          <option value="masuk">Masuk</option>
+          <option value="dicuci">Sedang Dicuci</option>
+          <option value="disetrika">Sedang Disetrika</option>
+          <option value="siap">Siap Diambil</option>
+          <option value="diambil">Sudah Diambil</option>
+        </select>
+
+        <select id="filterLayanan" class="form-select filter-select">
+          <option value="all">Semua Layanan</option>
+          <option value="cuci-setrika">Cuci + Setrika</option>
+          <option value="cuci">Cuci Kering</option>
+          <option value="setrika">Setrika Saja</option>
+          <option value="satuan">Cuci Satuan</option>
+        </select>
+
+        <select id="filterOverdue" class="form-select filter-select">
+          <option value="all">Semua Jadwal</option>
+          <option value="overdue">⚠️ Lewat Estimasi</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Gallery Cards Grid -->
+    <div class="galeri-grid" id="galeriContainer">
+      <div style="grid-column: 1 / -1; text-align:center; padding:3rem; color:var(--text-muted);">
+        Memuat koleksi foto pakaian...
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Dynamic Footer -->
+  <div id="siteFooter"></div>
+
+  <!-- Scripts -->
+  <script src="../lib/dexie.min.js"></script>
+  <script src="../js/db.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/mode.js"></script>
+  <script src="../js/galeri.js"></script>
+</body>
+</html>

@@ -3,3 +3,22 @@
 
 # Ada Library Information
 *.ali
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# Log & file sementara
+*.log
+*.tmp
+
+# Dokumen internal (jangan dipublikasikan)
+rancangan.md
+
+# Aset pribadi (jangan dipublikasikan)
+assets/ref_maya.jpg
