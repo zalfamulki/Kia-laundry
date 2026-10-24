@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // 1. Memuat statistik ringkasan hari ini
 async function loadDashboardStats() {
-  const allTrx = await db.transaksi.toArray();
+  const allTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   const allPakaian = await db.pakaian.toArray();
 
   const todayStr = new Date().toISOString().slice(0, 10);
@@ -70,7 +70,7 @@ async function loadDashboardStats() {
 
 // 2. Memuat daftar Pakaian Siap Antar/Ambil & Lewat Estimasi
 async function loadAlerts() {
-  const allTrx = await db.transaksi.toArray();
+  const allTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   const now = new Date();
 
   // Siap Antar/Ambil
@@ -180,9 +180,10 @@ async function handleTrackingSearch(e) {
   const matches = await db.transaksi
     .filter(
       (t) =>
-        t.id.toLowerCase().includes(query) ||
-        (t.noHp && t.noHp.includes(query)) ||
-        (t.namaCustomer && t.namaCustomer.toLowerCase().includes(query))
+        !t.deletedAt &&
+        (t.id.toLowerCase().includes(query) ||
+          (t.noHp && t.noHp.includes(query)) ||
+          (t.namaCustomer && t.namaCustomer.toLowerCase().includes(query)))
     )
     .toArray();
 

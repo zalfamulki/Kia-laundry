@@ -47,10 +47,27 @@ function setupDefaultFilterDates() {
 }
 
 async function loadLaporanData() {
-  masterTrx = await db.transaksi.toArray();
+  masterTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   masterPkn = await db.pakaian.toArray();
 
+  await updateTrashBadge();
   applyLaporanFilters();
+}
+
+async function updateTrashBadge() {
+  const badge = document.getElementById("trashCountBadge");
+  if (!badge) return;
+
+  const deleted = await getDeletedTransaksi();
+  badge.textContent = String(deleted.length);
+  badge.hidden = deleted.length === 0;
+
+  const btn = document.getElementById("btnOpenTrash");
+  if (btn) {
+    btn.title = deleted.length
+      ? `${deleted.length} transaksi di Sampah — bisa dipulihkan`
+      : "Sampah kosong";
+  }
 }
 
 function applyLaporanFilters() {
@@ -128,7 +145,7 @@ function renderLaporanTable() {
   if (filteredTrx.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="9" style="text-align:center; padding:2.5rem; color:#64748b;">
+        <td colspan="10" style="text-align:center; padding:2.5rem; color:#64748b;">
           Tidak ada data transaksi yang cocok dengan periode dan kriteria filter ini.
         </td>
       </tr>
@@ -160,6 +177,7 @@ function renderLaporanTable() {
           </td>
           <td>${getStatusBadge(t.status)}</td>
           <td>${renderFotoCell(t.id, items)}</td>
+          <td>${renderAksiCell(t)}</td>
         </tr>
       `;
     })
@@ -168,6 +186,229 @@ function renderLaporanTable() {
   tbody.querySelectorAll(".js-open-foto-nota").forEach((btn) => {
     btn.addEventListener("click", () => openFotoNota(btn.getAttribute("data-trx-id")));
   });
+  tbody.querySelectorAll(".js-mark-lunas").forEach((btn) => {
+    btn.addEventListener("click", () => markTransaksiLunas(btn.getAttribute("data-trx-id")));
+  });
+  tbody.querySelectorAll(".js-edit-trx").forEach((btn) => {
+    btn.addEventListener("click", () => openEditTransaksi(btn.getAttribute("data-trx-id")));
+  });
+  tbody.querySelectorAll(".js-delete-trx").forEach((btn) => {
+    btn.addEventListener("click", () => softDeleteDariLaporan(btn.getAttribute("data-trx-id")));
+  });
+}
+
+function renderAksiCell(trx) {
+  const lunasButton =
+    trx.statusBayar !== "lunas"
+      ? `<button type="button" class="btn btn-sm btn-success js-mark-lunas" data-trx-id="${escapeHtml(trx.id)}" title="Tandai pembayaran lunas">Lunas</button>`
+      : "";
+
+  return `
+    <div class="row-actions">
+      ${lunasButton}
+      <button type="button" class="btn btn-sm btn-outline-primary js-edit-trx" data-trx-id="${escapeHtml(trx.id)}" title="Edit status, pembayaran, total, dan catatan">Edit</button>
+      <button type="button" class="btn btn-sm btn-danger js-delete-trx" data-trx-id="${escapeHtml(trx.id)}" title="Pindahkan transaksi ke Sampah">Hapus</button>
+    </div>
+  `;
+}
+
+// ======================================================
+// Task 3 — Edit & hapus transaksi, ubah status pembayaran
+// ======================================================
+
+async function markTransaksiLunas(trxId) {
+  const trx = masterTrx.find((t) => t.id === trxId);
+  if (!trx) {
+    showToast("Data transaksi tidak ditemukan.", "error");
+    return;
+  }
+
+  if (trx.statusBayar === "lunas") {
+    showToast("Transaksi ini sudah lunas.", "info");
+    return;
+  }
+
+  if (!confirm(`Tandai pembayaran transaksi ${trxId} (${trx.namaCustomer}) sebagai LUNAS?`)) {
+    return;
+  }
+
+  try {
+    await db.transaksi.update(trxId, {
+      statusBayar: "lunas",
+      updatedAt: new Date().toISOString()
+    });
+    showToast(`Pembayaran ${trxId} berhasil ditandai lunas.`, "success");
+    await loadLaporanData();
+  } catch (err) {
+    console.error("Gagal mengubah status pembayaran:", err);
+    showToast("Gagal mengubah status pembayaran: " + err.message, "error");
+  }
+}
+
+function openEditTransaksi(trxId) {
+  const trx = masterTrx.find((t) => t.id === trxId);
+  if (!trx) {
+    showToast("Data transaksi tidak ditemukan.", "error");
+    return;
+  }
+
+  const statusOptions = [
+    ["masuk", "Masuk"],
+    ["dicuci", "Dicuci"],
+    ["disetrika", "Disetrika"],
+    ["siap", "Siap Antar/Ambil"],
+    ["diambil", "Sudah Diambil"]
+  ];
+
+  const bayarOptions = [
+    ["belum", "Belum Bayar"],
+    ["dp", "DP (Uang Muka)"],
+    ["lunas", "Lunas"]
+  ];
+
+  const statusHtml = statusOptions
+    .map(
+      ([value, label]) =>
+        `<option value="${value}" ${(trx.status || "masuk") === value ? "selected" : ""}>${label}</option>`
+    )
+    .join("");
+
+  const bayarHtml = bayarOptions
+    .map(
+      ([value, label]) =>
+        `<option value="${value}" ${(trx.statusBayar || "belum") === value ? "selected" : ""}>${label}</option>`
+    )
+    .join("");
+
+  const contentHtml = `
+    <div class="edit-trx-info">
+      <div><span>No. Nota</span><strong>${escapeHtml(trx.id)}</strong></div>
+      <div><span>Pelanggan</span><strong>${escapeHtml(trx.namaCustomer || "-")}</strong></div>
+      <div><span>No. WhatsApp</span><strong>${escapeHtml(trx.noHp || "-")}</strong></div>
+    </div>
+
+    <div class="edit-form-grid">
+      <div class="form-group">
+        <label class="form-label" for="editTrxStatus">Status Cucian</label>
+        <select id="editTrxStatus" class="form-select">${statusHtml}</select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editTrxStatusBayar">Status Pembayaran</label>
+        <select id="editTrxStatusBayar" class="form-select">${bayarHtml}</select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editTrxTotal">Total Harga (Rp)</label>
+        <input type="number" id="editTrxTotal" class="form-control" min="0" step="500" value="${Number(trx.totalHarga) || 0}">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editTrxCatatan">Catatan</label>
+        <input type="text" id="editTrxCatatan" class="form-control" maxlength="500" value="${escapeHtml(trx.catatan || "")}" placeholder="Catatan transaksi (opsional)">
+      </div>
+    </div>
+
+    <p class="form-help" style="margin-top:0.75rem;">
+      Perubahan status di sini adalah koreksi admin. Perubahan status pembayaran tidak mengubah total belanja customer.
+    </p>
+  `;
+
+  showModal(
+    `Edit Transaksi — ${escapeHtml(trx.id)}`,
+    contentHtml,
+    [
+      {
+        label: "Simpan Perubahan",
+        className: "btn-primary",
+        onClick: async (close) => {
+          const status = document.getElementById("editTrxStatus")?.value;
+          const statusBayar = document.getElementById("editTrxStatusBayar")?.value;
+          const totalHarga = Number(document.getElementById("editTrxTotal")?.value);
+          const catatan = document.getElementById("editTrxCatatan")?.value.trim() || "";
+
+          if (!statusOptions.some(([value]) => value === status)) {
+            showToast("Status cucian tidak valid.", "warning");
+            return;
+          }
+
+          if (!bayarOptions.some(([value]) => value === statusBayar)) {
+            showToast("Status pembayaran tidak valid.", "warning");
+            return;
+          }
+
+          if (!Number.isFinite(totalHarga) || totalHarga < 0) {
+            showToast("Total harga harus berupa angka 0 atau lebih.", "warning");
+            return;
+          }
+
+          if (catatan.length > 500) {
+            showToast("Catatan maksimal 500 karakter.", "warning");
+            return;
+          }
+
+          const now = new Date().toISOString();
+          const changes = {
+            status,
+            statusBayar,
+            totalHarga,
+            catatan,
+            updatedAt: now
+          };
+
+          if (status === "diambil" && !trx.diambilAt) {
+            changes.diambilAt = now;
+          }
+
+          try {
+            await db.transaksi.update(trxId, changes);
+            await recalcCustomerStats(trx.noHp);
+            await loadLaporanData();
+            close();
+            showToast(`Transaksi ${trxId} berhasil diperbarui.`, "success");
+          } catch (err) {
+            console.error("Gagal memperbarui transaksi:", err);
+            showToast("Gagal memperbarui transaksi: " + err.message, "error");
+          }
+        }
+      },
+      {
+        label: "Batal",
+        className: "btn-outline",
+        onClick: (close) => close()
+      }
+    ]
+  );
+}
+
+async function softDeleteDariLaporan(trxId) {
+  const trx = masterTrx.find((t) => t.id === trxId);
+  if (!trx) {
+    showToast("Data transaksi tidak ditemukan.", "error");
+    return;
+  }
+
+  const firstConfirm = confirm(
+    `Hapus transaksi ${trxId} (${trx.namaCustomer})?\n\nData akan dipindahkan ke Sampah dan masih bisa dipulihkan selama 30 hari.`
+  );
+  if (!firstConfirm) return;
+
+  const typed = prompt(`Ketik nomor nota "${trxId}" untuk konfirmasi penghapusan:`);
+  if (typed === null) return;
+
+  if (typed.trim() !== trxId) {
+    showToast("Nomor nota tidak cocok. Penghapusan dibatalkan.", "warning");
+    return;
+  }
+
+  try {
+    await softDeleteTransaksi(trxId);
+    showToast(`Transaksi ${trxId} dipindahkan ke Sampah.`, "success");
+    await loadLaporanData();
+  } catch (err) {
+    console.error("Gagal menghapus transaksi:", err);
+    showToast("Gagal menghapus transaksi: " + err.message, "error");
+  }
 }
 
 function renderFotoCell(trxId, items) {
@@ -237,6 +478,10 @@ function openFotoNota(trxId) {
             <div class="foto-nota-kondisi">
               <strong>Kondisi:</strong> ${escapeHtml(p.kondisi || "Baik tanpa catatan cacat")}
             </div>
+            <div class="foto-nota-card-actions">
+              <button type="button" class="btn btn-sm btn-outline-primary js-edit-pkn" data-pkn-id="${escapeHtml(p.id)}">Edit</button>
+              <button type="button" class="btn btn-sm btn-danger js-delete-pkn" data-pkn-id="${escapeHtml(p.id)}">Hapus</button>
+            </div>
           </div>
         </div>
       `;
@@ -287,7 +532,7 @@ function openFotoNota(trxId) {
     contentHtml,
     [
       {
-        label: "Chat WhatsApp Pemilik",
+        label: "Chat WhatsApp Pelanggan",
         className: "btn-success",
         onClick: () => {
           if (!waUrl) {
@@ -319,6 +564,186 @@ function openFotoNota(trxId) {
       openFotoLightbox(Number(btn.getAttribute("data-foto-index")));
     });
   });
+
+  document.querySelectorAll(".js-edit-pkn").forEach((btn) => {
+    btn.addEventListener("click", () => openEditPakaian(btn.getAttribute("data-pkn-id")));
+  });
+
+  document.querySelectorAll(".js-delete-pkn").forEach((btn) => {
+    btn.addEventListener("click", () => deletePakaianItem(btn.getAttribute("data-pkn-id")));
+  });
+}
+
+// ======================================================
+// Task 3 — Edit & hapus item pakaian
+// ======================================================
+
+function openEditPakaian(pknId) {
+  const p = masterPkn.find((item) => item.id === pknId);
+  if (!p) {
+    showToast("Data pakaian tidak ditemukan.", "error");
+    return;
+  }
+
+  const thumb = p.fotoThumb || p.foto;
+  const previewHtml = thumb
+    ? `<img src="${thumb}" alt="Foto ${escapeHtml(p.jenis || "pakaian")}" class="edit-pkn-preview">`
+    : `<div class="edit-pkn-preview is-empty">Belum ada foto</div>`;
+
+  const contentHtml = `
+    <div class="edit-form-grid">
+      <div class="form-group">
+        <label class="form-label" for="editPknJenis">Jenis Pakaian</label>
+        <input type="text" id="editPknJenis" class="form-control" value="${escapeHtml(p.jenis || "")}" maxlength="80">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editPknWarna">Warna</label>
+        <input type="text" id="editPknWarna" class="form-control" value="${escapeHtml(p.warna || "")}" maxlength="60">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editPknMerek">Merek</label>
+        <input type="text" id="editPknMerek" class="form-control" value="${escapeHtml(p.merek || "")}" maxlength="80">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="editPknJumlah">Jumlah (pcs)</label>
+        <input type="number" id="editPknJumlah" class="form-control" min="1" step="1" value="${Number(p.jumlah) || 1}">
+      </div>
+
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label" for="editPknKondisi">Kondisi</label>
+        <input type="text" id="editPknKondisi" class="form-control" value="${escapeHtml(p.kondisi || "")}" maxlength="120">
+      </div>
+    </div>
+
+    <div class="edit-pkn-photo">
+      <div class="form-label">Foto Item</div>
+      ${previewHtml}
+      <input type="file" id="editPknFoto" class="form-control" accept="image/*" style="margin-top:0.6rem;">
+      <label class="edit-pkn-remove-photo">
+        <input type="checkbox" id="editPknHapusFoto">
+        Hapus foto saat ini
+      </label>
+      <p class="form-help">Pilih file baru untuk mengganti foto. Foto akan dikompres otomatis.</p>
+    </div>
+  `;
+
+  showModal(
+    `Edit Pakaian — ${escapeHtml(p.jenis || "Item")}`,
+    contentHtml,
+    [
+      {
+        label: "Simpan Perubahan",
+        className: "btn-primary",
+        onClick: async (close) => {
+          const jenis = document.getElementById("editPknJenis")?.value.trim() || "";
+          const warna = document.getElementById("editPknWarna")?.value.trim() || "-";
+          const merek = document.getElementById("editPknMerek")?.value.trim() || "";
+          const jumlah = parseInt(document.getElementById("editPknJumlah")?.value, 10);
+          const kondisi = document.getElementById("editPknKondisi")?.value.trim() || "Kondisi baik";
+          const hapusFoto = Boolean(document.getElementById("editPknHapusFoto")?.checked);
+          const fileInput = document.getElementById("editPknFoto");
+          const file = fileInput && fileInput.files ? fileInput.files[0] : null;
+
+          if (!jenis) {
+            showToast("Jenis pakaian wajib diisi.", "warning");
+            return;
+          }
+
+          if (!Number.isFinite(jumlah) || jumlah < 1) {
+            showToast("Jumlah pakaian minimal 1 pcs.", "warning");
+            return;
+          }
+
+          const changes = {
+            jenis,
+            warna: warna || "-",
+            merek,
+            jumlah,
+            kondisi
+          };
+
+          try {
+            if (file) {
+              if (typeof KameraManager === "undefined") {
+                showToast("Modul kamera tidak termuat. Muat ulang halaman.", "error");
+                return;
+              }
+              const compressed = await KameraManager.compressImage(file);
+              changes.foto = compressed.foto;
+              changes.fotoThumb = compressed.fotoThumb;
+              changes.fotoPurgedAt = null;
+            } else if (hapusFoto) {
+              changes.foto = null;
+              changes.fotoThumb = null;
+              changes.fotoPurgedAt = null;
+            }
+
+            await db.pakaian.update(pknId, changes);
+            await db.transaksi.update(p.transaksiId, { updatedAt: new Date().toISOString() });
+
+            await loadLaporanData();
+            close();
+            openFotoNota(p.transaksiId);
+            showToast("Data pakaian berhasil diperbarui.", "success");
+          } catch (err) {
+            console.error("Gagal memperbarui pakaian:", err);
+            showToast("Gagal memperbarui pakaian: " + err.message, "error");
+          }
+        }
+      },
+      {
+        label: "Batal",
+        className: "btn-outline",
+        onClick: (close) => {
+          close();
+          openFotoNota(p.transaksiId);
+        }
+      }
+    ]
+  );
+
+  const fileInput = document.getElementById("editPknFoto");
+  if (fileInput) {
+    fileInput.addEventListener("change", () => {
+      const hapusCheckbox = document.getElementById("editPknHapusFoto");
+      if (fileInput.files && fileInput.files.length > 0 && hapusCheckbox) {
+        hapusCheckbox.checked = false;
+      }
+    });
+  }
+}
+
+async function deletePakaianItem(pknId) {
+  const p = masterPkn.find((item) => item.id === pknId);
+  if (!p) {
+    showToast("Data pakaian tidak ditemukan.", "error");
+    return;
+  }
+
+  if (!confirm(`Hapus item "${p.jenis || "pakaian"}" (${Number(p.jumlah) || 1} pcs) dari nota ${p.transaksiId}?`)) {
+    return;
+  }
+
+  try {
+    await db.pakaian.delete(pknId);
+    await db.transaksi.update(p.transaksiId, { updatedAt: new Date().toISOString() });
+    await loadLaporanData();
+
+    closeModal();
+
+    const remaining = masterPkn.filter((item) => item.transaksiId === p.transaksiId);
+    if (remaining.length > 0) {
+      openFotoNota(p.transaksiId);
+    }
+
+    showToast("Item pakaian berhasil dihapus.", "success");
+  } catch (err) {
+    console.error("Gagal menghapus pakaian:", err);
+    showToast("Gagal menghapus pakaian: " + err.message, "error");
+  }
 }
 
 function buildWhatsAppUrl(trx) {

@@ -299,6 +299,13 @@
   font-size: 0.68rem;
 }
 
+.selesai-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
 .selesai-customer {
   max-width: 220px;
   overflow: hidden;
@@ -646,7 +653,11 @@ body.proses-lightbox-open {
   }
 
   .selesai-table th:last-child {
-    width: 78px !important;
+    width: 112px !important;
+  }
+
+  .selesai-actions {
+    gap: 0.2rem;
   }
 
   .selesai-customer {

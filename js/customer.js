@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 async function loadCustomerData() {
   customerList = await db.customer.toArray();
-  transaksiList = await db.transaksi.toArray();
+  transaksiList = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   pakaianList = await db.pakaian.toArray();
 
   renderCustomerTable(customerList);

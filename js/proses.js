@@ -37,7 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function loadProsesBoard() {
-  allTrx = await db.transaksi.toArray();
+  allTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   allPkn = await db.pakaian.toArray();
   activeSettings = (await db.pengaturan.get("app")) || {};
 
@@ -154,9 +154,16 @@ function renderSelesaiTable() {
         <td>${formatTanggal(trx.diambilAt || trx.updatedAt || trx.tanggalMasuk, true)}</td>
         <td class="selesai-total">${formatRupiah(trx.totalHarga)}</td>
         <td>
-          <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
-            Lihat Detail
-          </button>
+          <div class="selesai-actions">
+            ${
+              trx.statusBayar !== "lunas"
+                ? `<button type="button" class="btn btn-sm btn-success" onclick="markProsesLunas('${escapeHtml(trx.id)}')" title="Tandai pembayaran lunas">Lunas</button>`
+                : ""
+            }
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
+              Lihat Detail
+            </button>
+          </div>
         </td>
       </tr>
     `
@@ -198,6 +205,38 @@ async function handleStageTransition(trxId, nextStatus) {
 
   showToast(`Cucian ${trxId} dipindahkan ke status: ${statusLabel}`, "success");
   await loadProsesBoard();
+}
+
+// Task 3 — Ubah status pembayaran dari halaman Proses
+async function markProsesLunas(trxId) {
+  const trx = allTrx.find((t) => t.id === trxId);
+  if (!trx) {
+    showToast("Data transaksi tidak ditemukan.", "error");
+    return false;
+  }
+
+  if (trx.statusBayar === "lunas") {
+    showToast("Transaksi ini sudah lunas.", "info");
+    return false;
+  }
+
+  if (!confirm(`Tandai pembayaran transaksi ${trxId} (${trx.namaCustomer}) sebagai LUNAS?`)) {
+    return false;
+  }
+
+  try {
+    await db.transaksi.update(trxId, {
+      statusBayar: "lunas",
+      updatedAt: new Date().toISOString()
+    });
+    showToast(`Pembayaran ${trxId} berhasil ditandai lunas.`, "success");
+    await loadProsesBoard();
+    return true;
+  } catch (err) {
+    console.error("Gagal mengubah status pembayaran:", err);
+    showToast("Gagal mengubah status pembayaran: " + err.message, "error");
+    return false;
+  }
 }
 
 // Modal Verifikasi Checklist Fisik Pakaian Sebelum Diserahkan
@@ -417,6 +456,17 @@ function openProsesDetail(trxId) {
     });
   }
 
+  if (trx.statusBayar !== "lunas") {
+    buttons.push({
+      label: "Tandai Lunas",
+      className: "btn-success",
+      onClick: async (close) => {
+        const updated = await markProsesLunas(trx.id);
+        if (updated) close();
+      }
+    });
+  }
+
   buttons.push({
     label: "Cetak Nota",
     className: "btn-outline-primary",
@@ -461,9 +511,16 @@ function openSelesaiSemuaModal() {
         <td>${formatTanggal(trx.diambilAt || trx.updatedAt || trx.tanggalMasuk, true)}</td>
         <td class="selesai-total">${formatRupiah(trx.totalHarga)}</td>
         <td>
-          <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
-            Lihat Detail
-          </button>
+          <div class="selesai-actions">
+            ${
+              trx.statusBayar !== "lunas"
+                ? `<button type="button" class="btn btn-sm btn-success js-lunas-selesai-modal" data-trx-id="${escapeHtml(trx.id)}" title="Tandai pembayaran lunas">Lunas</button>`
+                : ""
+            }
+            <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
+              Lihat Detail
+            </button>
+          </div>
         </td>
       </tr>
     `
@@ -482,7 +539,7 @@ function openSelesaiSemuaModal() {
             <th>Pelanggan</th>
             <th>Selesai</th>
             <th>Total</th>
-            <th style="width: 118px;">Aksi</th>
+            <th style="width: 165px;">Aksi</th>
           </tr>
         </thead>
         <tbody>${rowsHtml}</tbody>
@@ -498,6 +555,16 @@ function openSelesaiSemuaModal() {
     ],
     { size: "lg" }
   );
+
+  document.querySelectorAll(".js-lunas-selesai-modal").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const updated = await markProsesLunas(btn.getAttribute("data-trx-id"));
+      if (updated) {
+        closeModal();
+        openSelesaiSemuaModal();
+      }
+    });
+  });
 }
 
 // WhatsApp ke pelanggan saat cucian siap

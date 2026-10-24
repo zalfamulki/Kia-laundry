@@ -31,6 +31,12 @@
           <span class="filter-icon-badge" id="filterActiveBadge" hidden>0</span>
         </button>
 
+        <a href="./sampah.html" class="btn btn-outline btn-sm" id="btnOpenTrash" title="Transaksi yang dihapus (bisa dipulihkan)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          <span>Sampah</span>
+          <span class="trash-count-badge" id="trashCountBadge">0</span>
+        </a>
+
         <a href="./transaksi.html" class="btn btn-yellow btn-sm">
           <span>+ Transaksi Baru</span>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -194,11 +200,12 @@
               <th>Total & Pembayaran</th>
               <th>Status</th>
               <th>Foto</th>
+              <th style="width: 190px;">Aksi</th>
             </tr>
           </thead>
           <tbody id="laporanTableBody">
             <tr>
-              <td colspan="9" style="text-align:center; padding:2rem;">Memuat data laporan...</td>
+              <td colspan="10" style="text-align:center; padding:2rem;">Memuat data laporan...</td>
             </tr>
           </tbody>
         </table>
@@ -230,6 +237,7 @@
   <script src="../js/db.js"></script>
   <script src="../js/ui.js"></script>
   <script src="../js/mode.js"></script>
+  <script src="../js/kamera.js"></script>
   <script src="../js/export.js"></script>
   <script src="../js/laporan.js"></script>
 </body>

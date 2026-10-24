@@ -1,0 +1,117 @@
+/* ========================================================
+   KIA LAUNDRY — Halaman Sampah (Task 3.4)
+   ======================================================== */
+
+.trash-info-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.15rem;
+  margin-bottom: 1.5rem;
+  color: #9a3412;
+}
+
+.trash-info-icon {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.trash-info-banner strong {
+  display: block;
+  font-size: 0.92rem;
+  color: #7c2d12;
+}
+
+.trash-info-banner p {
+  margin-top: 0.25rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #9a3412;
+}
+
+.trash-info-count {
+  margin-left: auto;
+  text-align: center;
+  min-width: 70px;
+}
+
+.trash-info-count span {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #c2410c;
+  line-height: 1.1;
+}
+
+.trash-info-count small {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9a3412;
+}
+
+.sampah-table {
+  min-width: 760px;
+}
+
+.sampah-meta {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+}
+
+.sampah-total {
+  font-weight: 800;
+  color: var(--text-main);
+  white-space: nowrap;
+}
+
+.trash-days {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-full);
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.trash-days.is-urgent {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.sampah-empty {
+  text-align: center !important;
+  padding: 2.5rem 1rem !important;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 700px) {
+  .trash-info-banner {
+    flex-wrap: wrap;
+  }
+
+  .trash-info-count {
+    margin-left: 0;
+    text-align: left;
+  }
+
+  .sampah-table {
+    min-width: 680px;
+  }
+}
