@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     await initDB();
     await loadDashboardStats();
     await loadAlerts();
+    await loadBelumLunas();
   } catch (err) {
     console.error("Gagal memuat data dashboard:", err);
     showToast("Gagal menginisialisasi data lokal.", "error");
@@ -46,8 +47,12 @@ async function loadDashboardStats() {
   // Total omzet hari ini
   const omzetHariIni = trxHariIni.reduce((acc, t) => acc + (Number(t.totalHarga) || 0), 0);
 
-  // Belum bayar
-  const belumBayar = allTrx.filter((t) => t.statusBayar === "belum");
+  // Belum lunas / masih ada sisa tagihan (DP ikut dihitung)
+  const belumBayar = allTrx.filter((t) =>
+    typeof getSisaTagihan === "function"
+      ? getSisaTagihan(t) > 0
+      : t.statusBayar === "belum"
+  );
 
   // Update UI Element Counters (Murni data riil, default 0 tanpa angka dummy)
   const elTrxHariIni = document.getElementById("statTrxHariIni");
@@ -71,6 +76,8 @@ async function loadDashboardStats() {
 // 2. Memuat daftar Pakaian Siap Antar/Ambil & Lewat Estimasi
 async function loadAlerts() {
   const allTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
+  const allPakaian = await db.pakaian.toArray();
+  const settings = (await db.pengaturan.get("app")) || {};
   const now = new Date();
 
   // Siap Antar/Ambil
@@ -88,11 +95,21 @@ async function loadAlerts() {
       containerSiap.innerHTML = listSiap
         .slice(0, 5)
         .map((t) => {
-          const waUrl = `https://wa.me/62${(t.noHp || '').replace(/^0/, '')}?text=Halo%20Kak%20${encodeURIComponent(
-            t.namaCustomer
-          )},%20cucian%20Anda%20dengan%20No%20${t.id}%20di%20KIA%20Laundry%20sudah%20SELESAI%20dan%20siap%20diantar/diambil.%20Total:%20${formatRupiah(
-            t.totalHarga
-          )}.`;
+          const items = allPakaian.filter((p) => p.transaksiId === t.id);
+          const waUrl =
+            typeof buildWaUrl === "function"
+              ? buildWaUrl("siap", t, settings, items)
+              : (() => {
+                  const phone =
+                    typeof normalizeWhatsAppPhone === "function"
+                      ? normalizeWhatsAppPhone(t.noHp)
+                      : String(t.noHp || "").replace(/\D/g, "").replace(/^0/, "62");
+                  return phone
+                    ? `https://wa.me/${phone}?text=${encodeURIComponent(
+                        `Halo Kak ${t.namaCustomer || ""}, cucian Anda dengan No ${t.id} di KIA Laundry sudah selesai dan siap diantar/diambil. Total: ${formatRupiah(t.totalHarga)}.`
+                      )}`
+                    : "";
+                })();
 
           return `
             <div class="alert-item">
@@ -101,9 +118,13 @@ async function loadAlerts() {
                 <span>${t.id} • ${formatRupiah(t.totalHarga)} • ${t.layanan}</span>
               </div>
               <div style="display:flex; gap:0.4rem;">
-                <a href="${waUrl}" target="_blank" class="btn btn-sm btn-success" title="Hubungi via WhatsApp">
+                ${
+                  waUrl
+                    ? `<a href="${waUrl}" target="_blank" class="btn btn-sm btn-success" title="Hubungi via WhatsApp">
                   WA Notif
-                </a>
+                </a>`
+                    : ""
+                }
                 <button class="btn btn-sm btn-outline" onclick="tandaiDiambil('${t.id}')">
                   Serahkan
                 </button>
@@ -153,17 +174,73 @@ async function loadAlerts() {
 }
 
 // Cepat tandai cucian sudah diambil
+// Status pembayaran tidak diubah di sini; keputusan Lunas dilakukan di Proses/Laporan.
 async function tandaiDiambil(trxId) {
-  if (confirm(`Konfirmasi penyerahan cucian untuk transaksi ${trxId}?`)) {
+  if (confirm(`Konfirmasi penyerahan cucian untuk transaksi ${trxId}?\n\nStatus pembayaran tidak berubah. Tandai Lunas secara terpisah bila sudah dibayar.`)) {
     await db.transaksi.update(trxId, {
       status: "diambil",
-      statusBayar: "lunas",
+      diambilAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
     showToast("Transaksi berhasil ditandai telah diambil!", "success");
     await loadDashboardStats();
     await loadAlerts();
+    await loadBelumLunas();
   }
+}
+
+// 3. Task 4 — daftar tagihan yang belum lunas
+async function loadBelumLunas() {
+  const section = document.getElementById("belumLunasSection");
+  const container = document.getElementById("listBelumLunas");
+  if (!section || !container) return;
+
+  const allTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
+  const unpaid = allTrx
+    .map((t) => ({ trx: t, sisa: typeof getSisaTagihan === "function" ? getSisaTagihan(t) : 0 }))
+    .filter((row) => row.sisa > 0)
+    .sort((a, b) => String(b.trx.tanggalMasuk || "").localeCompare(String(a.trx.tanggalMasuk || "")));
+
+  if (unpaid.length === 0) {
+    section.hidden = true;
+    container.innerHTML = "";
+    return;
+  }
+
+  const totalSisa = unpaid.reduce((sum, row) => sum + row.sisa, 0);
+
+  container.innerHTML = `
+    <div class="belum-lunas-total">
+      <span>${unpaid.length} transaksi belum lunas</span>
+      <strong>${formatRupiah(totalSisa)}</strong>
+    </div>
+    ${unpaid
+      .slice(0, 5)
+      .map(({ trx, sisa }) => {
+        const dibayar =
+          typeof getJumlahDibayar === "function" ? getJumlahDibayar(trx) : 0;
+        return `
+          <div class="belum-lunas-item">
+            <div class="belum-lunas-info">
+              <div class="belum-lunas-name">${escapeHtml(trx.namaCustomer || "-")}</div>
+              <div class="belum-lunas-meta">
+                ${escapeHtml(trx.id)} • ${escapeHtml(formatLayananLabel(trx.layanan))} • Total ${formatRupiah(trx.totalHarga)}
+                ${dibayar > 0 ? ` • Dibayar ${formatRupiah(dibayar)}` : ""}
+              </div>
+            </div>
+            <div class="belum-lunas-amount">${formatRupiah(sisa)}</div>
+            <a href="./pages/proses.html" class="btn btn-sm btn-outline-primary">Lihat</a>
+          </div>
+        `;
+      })
+      .join("")}
+    ${
+      unpaid.length > 5
+        ? `<div class="belum-lunas-more"><a href="./pages/laporan.html">Lihat ${unpaid.length - 5} transaksi lainnya</a></div>`
+        : ""
+    }
+  `;
+  section.hidden = false;
 }
 
 // Tracking Status Cepat

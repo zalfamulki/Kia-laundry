@@ -33,11 +33,27 @@
       </div>
     </div>
 
+    <!-- Tab Tahap (sticky di mobile) -->
+    <div class="proses-stage-tabs" id="prosesStageTabs" role="tablist" aria-label="Pilih tahap proses cucian">
+      <button type="button" class="proses-stage-tab is-active" data-stage="masuk" role="tab" aria-selected="true">
+        Masuk <span class="proses-stage-count" id="tabCount_masuk">0</span>
+      </button>
+      <button type="button" class="proses-stage-tab" data-stage="dicuci" role="tab" aria-selected="false">
+        Dicuci <span class="proses-stage-count" id="tabCount_dicuci">0</span>
+      </button>
+      <button type="button" class="proses-stage-tab" data-stage="disetrika" role="tab" aria-selected="false">
+        Disetrika <span class="proses-stage-count" id="tabCount_disetrika">0</span>
+      </button>
+      <button type="button" class="proses-stage-tab" data-stage="siap" role="tab" aria-selected="false">
+        Siap <span class="proses-stage-count" id="tabCount_siap">0</span>
+      </button>
+    </div>
+
     <!-- Papan Kanban 4 Kolom Aktif -->
     <div class="kanban-board" id="kanbanBoard">
 
       <!-- Kolom 1: Masuk -->
-      <div class="kanban-column">
+      <div class="kanban-column" data-stage="masuk">
         <div class="column-header">
           <div class="column-title">
             <span class="badge-dot" style="background:var(--status-masuk);"></span>
@@ -49,7 +65,7 @@
       </div>
 
       <!-- Kolom 2: Dicuci -->
-      <div class="kanban-column">
+      <div class="kanban-column" data-stage="dicuci">
         <div class="column-header">
           <div class="column-title">
             <span class="badge-dot" style="background:var(--status-cuci);"></span>
@@ -61,7 +77,7 @@
       </div>
 
       <!-- Kolom 3: Disetrika -->
-      <div class="kanban-column">
+      <div class="kanban-column" data-stage="disetrika">
         <div class="column-header">
           <div class="column-title">
             <span class="badge-dot" style="background:var(--status-setrika);"></span>
@@ -73,7 +89,7 @@
       </div>
 
       <!-- Kolom 4: Siap Antar / Ambil -->
-      <div class="kanban-column is-ready">
+      <div class="kanban-column is-ready" data-stage="siap">
         <div class="column-header">
           <div class="column-title">
             <span class="badge-dot" style="background:var(--status-siap);"></span>
@@ -141,6 +157,7 @@
   <script src="../lib/dexie.min.js"></script>
   <script src="../js/db.js"></script>
   <script src="../js/ui.js"></script>
+  <script src="../js/wa.js"></script>
   <script src="../js/mode.js"></script>
   <script src="../js/proses.js"></script>
 </body>

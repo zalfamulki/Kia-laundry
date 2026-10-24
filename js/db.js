@@ -6,6 +6,44 @@
 
 const db = new Dexie("KiaLaundryDB");
 
+// ============================================================
+// Task 4 — Default template WhatsApp & syarat nota
+// ============================================================
+
+const DEFAULT_SYARAT =
+  "Barang yang tidak diambil lebih dari 30 hari setelah selesai di luar tanggung jawab KIA Laundry. Mohon simpan nota ini sebagai bukti pengambilan.";
+
+const DEFAULT_WA_TEMPLATES = {
+  masuk: `Halo Kak {nama}, terima kasih sudah mempercayakan cucian di {toko}.
+
+Cucian sudah kami terima dan dicatat dengan baik.
+No. Nota: {nota}
+Layanan: {layanan}
+Jumlah: {pcs}{berat_info}
+Estimasi selesai: {estimasi}
+Total: {total}
+Pembayaran: {status_bayar}{sisa_info}
+
+Foto kondisi awal pakaian sudah kami simpan sebagai bukti. Kami kabari lagi begitu cucian siap.
+
+{syarat}
+
+Salam,
+{toko}`,
+  siap: `Halo Kak {nama}, kabar baik! Cucian Anda di {toko} sudah siap.
+
+No. Nota: {nota}
+Layanan: {layanan}
+Total: {total}
+Pembayaran: {status_bayar}{sisa_info}
+{metode_info}
+
+{catatan_info}{syarat}
+
+Terima kasih,
+{toko}`
+};
+
 db.version(1).stores({
   transaksi: "id, tanggalMasuk, namaCustomer, noHp, layanan, estimasiSelesai, status, statusBayar, totalHarga, createdAt",
   pakaian: "id, transaksiId, jenis, warna, kondisi, createdAt",
@@ -50,6 +88,10 @@ async function initDB() {
           sepatu: 25000
         }
       },
+      kasir: "Kasir KIA Laundry",
+      syarat: DEFAULT_SYARAT,
+      waTemplateMasuk: DEFAULT_WA_TEMPLATES.masuk,
+      waTemplateSiap: DEFAULT_WA_TEMPLATES.siap,
       modePreference: "auto" // 'auto', 'offline', 'online'
     });
   }
@@ -449,4 +491,187 @@ async function runTrashPurgeOncePerDay() {
     console.warn("Purge Sampah otomatis gagal:", err);
     return 0;
   }
+}
+
+// ============================================================
+// Task 4 — Pembayaran, foto/item pakaian, rekalkulasi menyeluruh
+// ============================================================
+
+/**
+ * Nominal yang sudah dibayar.
+ * - `lunas` selalu dianggap lunas penuh (kompatibel dengan data lama).
+ * - Record lama tanpa `jumlahDibayar` dianggap 0.
+ * @param {object} trx
+ * @returns {number}
+ */
+function getJumlahDibayar(trx) {
+  if (!trx) return 0;
+  const total = Math.max(0, Number(trx.totalHarga) || 0);
+  if ((trx.statusBayar || "belum") === "lunas") return total;
+
+  const paid = Number(trx.jumlahDibayar);
+  if (!Number.isFinite(paid) || paid <= 0) return 0;
+  return Math.min(paid, total);
+}
+
+/** Sisa tagihan (tidak pernah negatif). */
+function getSisaTagihan(trx) {
+  if (!trx) return 0;
+  const total = Math.max(0, Number(trx.totalHarga) || 0);
+  return Math.max(0, total - getJumlahDibayar(trx));
+}
+
+/** Ringkasan pembayaran satu transaksi. */
+function getPaymentInfo(trx) {
+  const total = Math.max(0, Number(trx?.totalHarga) || 0);
+  const dibayar = getJumlahDibayar(trx);
+  return {
+    total,
+    dibayar,
+    sisa: Math.max(0, total - dibayar),
+    statusBayar: trx?.statusBayar || "belum"
+  };
+}
+
+/**
+ * Selaraskan status pembayaran dengan nominal yang dibayar.
+ * Aturan: belum = 0, dp = 0 < nominal < total, lunas = total penuh.
+ * @returns {{statusBayar: string, jumlahDibayar: number}}
+ */
+function normalizePayment(statusBayar, totalHarga, jumlahDibayar) {
+  const total = Math.max(0, Number(totalHarga) || 0);
+  let paid = Number(jumlahDibayar);
+  if (!Number.isFinite(paid) || paid < 0) paid = 0;
+  paid = Math.min(paid, total);
+
+  if (statusBayar === "lunas") {
+    return { statusBayar: "lunas", jumlahDibayar: total };
+  }
+  if (statusBayar === "belum" || paid <= 0) {
+    return { statusBayar: "belum", jumlahDibayar: 0 };
+  }
+  if (total > 0 && paid >= total) {
+    return { statusBayar: "lunas", jumlahDibayar: total };
+  }
+  return { statusBayar: "dp", jumlahDibayar: paid };
+}
+
+/**
+ * Hapus foto satu item pakaian (data teks tetap ada).
+ * @param {string} pknId
+ * @returns {Promise<object>} record pakaian terbaru
+ */
+async function hapusFotoPakaian(pknId) {
+  const p = await db.pakaian.get(pknId);
+  if (!p) throw new Error("Item pakaian tidak ditemukan.");
+
+  const now = new Date().toISOString();
+  await db.pakaian.update(pknId, {
+    foto: null,
+    fotoThumb: null,
+    fotoPurgedAt: now
+  });
+
+  if (p.transaksiId) {
+    await db.transaksi.update(p.transaksiId, { updatedAt: now });
+  }
+
+  return { ...p, foto: null, fotoThumb: null, fotoPurgedAt: now };
+}
+
+/**
+ * Hapus permanen satu item pakaian beserta fotonya.
+ * Transaksi induk dan totalHarga tidak diubah otomatis.
+ * @param {string} pknId
+ * @returns {Promise<{transaksiId: string, jenis: string}>}
+ */
+async function hapusPakaianItem(pknId) {
+  const p = await db.pakaian.get(pknId);
+  if (!p) throw new Error("Item pakaian tidak ditemukan.");
+
+  await db.pakaian.delete(pknId);
+
+  if (p.transaksiId) {
+    await db.transaksi.update(p.transaksiId, { updatedAt: new Date().toISOString() });
+  }
+
+  return { transaksiId: p.transaksiId, jenis: p.jenis || "pakaian" };
+}
+
+/**
+ * Hitung ulang seluruh statistik customer dari transaksi aktif.
+ * Dipakai setelah restore backup agar counter tidak salah.
+ * Data customer lama (catatan/alamat) dipertahankan bila nomor HP masih ada.
+ * @returns {Promise<number>} jumlah customer aktif
+ */
+async function recalcAllCustomerStats() {
+  const trxAktif = await getActiveTransaksi();
+
+  const byPhone = new Map();
+  for (const trx of trxAktif) {
+    const key = String(trx.noHp || "").trim();
+    if (!key) continue;
+    if (!byPhone.has(key)) byPhone.set(key, []);
+    byPhone.get(key).push(trx);
+  }
+
+  const existing = await db.customer.toArray();
+  const existingByPhone = new Map();
+  for (const cus of existing) {
+    const key = String(cus.noHp || "").trim();
+    if (!key) continue;
+    if (!existingByPhone.has(key)) existingByPhone.set(key, []);
+    existingByPhone.get(key).push(cus);
+  }
+
+  for (const [noHp, list] of byPhone) {
+    const totalTransaksi = list.length;
+    const totalBelanja = list.reduce(
+      (sum, trx) => sum + (Number(trx.totalHarga) || 0),
+      0
+    );
+    const latest = list
+      .slice()
+      .sort((a, b) =>
+        String(b.createdAt || b.tanggalMasuk || "").localeCompare(
+          String(a.createdAt || a.tanggalMasuk || "")
+        )
+      )[0];
+
+    const customers = existingByPhone.get(noHp) || [];
+    if (customers.length > 0) {
+      const primary = customers[0];
+      await db.customer.update(primary.id, {
+        nama: latest?.namaCustomer || primary.nama,
+        alamat: latest?.alamat || primary.alamat,
+        totalTransaksi,
+        totalBelanja
+      });
+      if (customers.length > 1) {
+        await db.customer.bulkDelete(customers.slice(1).map((c) => c.id));
+      }
+    } else {
+      const newId =
+        "CUS-" + Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+      await db.customer.put({
+        id: newId,
+        nama: latest?.namaCustomer || "Customer Baru",
+        noHp,
+        alamat: latest?.alamat || "",
+        catatan: "",
+        totalTransaksi,
+        totalBelanja,
+        createdAt: new Date().toISOString()
+      });
+    }
+  }
+
+  const orphanIds = existing
+    .filter((cus) => !byPhone.has(String(cus.noHp || "").trim()))
+    .map((cus) => cus.id);
+  if (orphanIds.length > 0) {
+    await db.customer.bulkDelete(orphanIds);
+  }
+
+  return byPhone.size;
 }

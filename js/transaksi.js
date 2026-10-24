@@ -121,6 +121,8 @@ function setupEventListeners() {
   const layananSelect = document.getElementById("layananSelect");
   const beratInput = document.getElementById("beratInput");
   const totalHargaInput = document.getElementById("totalHargaInput");
+  const statusBayarSelect = document.getElementById("statusBayarSelect");
+  const jumlahDibayarInput = document.getElementById("jumlahDibayarInput");
 
   // Kalkulasi harga otomatis
   const recalculatePrice = () => {
@@ -146,7 +148,7 @@ function setupEventListeners() {
     if (totalHargaInput) {
       totalHargaInput.value = Math.round(total);
     }
-    updateSummaryUI();
+    syncPaymentInputs("status");
   };
 
   if (layananSelect) {
@@ -164,6 +166,17 @@ function setupEventListeners() {
   if (totalHargaInput) {
     totalHargaInput.addEventListener("input", updateSummaryUI);
   }
+
+  // Task 4 — sinkronisasi status bayar <-> nominal dibayar
+  if (statusBayarSelect) {
+    statusBayarSelect.addEventListener("change", () => syncPaymentInputs("status"));
+  }
+
+  if (jumlahDibayarInput) {
+    jumlahDibayarInput.addEventListener("input", () => syncPaymentInputs("paid"));
+  }
+
+  syncPaymentInputs("status");
 
   // Kamera: Buka Webcam / Live Stream
   const btnStartWebcam = document.getElementById("btnStartWebcam");
@@ -371,6 +384,56 @@ function updateSummaryUI() {
 
   const elSumTotal = document.getElementById("sumTotal");
   if (elSumTotal) elSumTotal.textContent = formatRupiah(total);
+
+  // Task 4 — ringkasan pembayaran (dibayar & sisa)
+  const statusBayar = document.getElementById("statusBayarSelect")?.value || "belum";
+  const paidRaw = Number(document.getElementById("jumlahDibayarInput")?.value) || 0;
+  const payment =
+    typeof normalizePayment === "function"
+      ? normalizePayment(statusBayar, total, paidRaw)
+      : { statusBayar, jumlahDibayar: paidRaw };
+  const dibayar = Math.min(payment.jumlahDibayar, total);
+  const sisa = Math.max(0, total - dibayar);
+
+  const elSumDibayar = document.getElementById("sumDibayar");
+  if (elSumDibayar) elSumDibayar.textContent = formatRupiah(dibayar);
+
+  const elSumSisa = document.getElementById("sumSisa");
+  if (elSumSisa) {
+    elSumSisa.textContent = formatRupiah(sisa);
+    elSumSisa.style.color = sisa > 0 ? "#b91c1c" : "#047857";
+  }
+}
+
+/**
+ * Task 4 — jaga status pembayaran tetap konsisten dengan nominal.
+ * source "status": status diubah user, nominal mengikuti.
+ * source "paid": nominal diketik user, status menyesuaikan.
+ */
+function syncPaymentInputs(source = "status") {
+  const total = Number(document.getElementById("totalHargaInput")?.value) || 0;
+  const statusSelect = document.getElementById("statusBayarSelect");
+  const paidInput = document.getElementById("jumlahDibayarInput");
+  if (!statusSelect || !paidInput) return;
+
+  if (source === "status") {
+    if (statusSelect.value === "lunas") {
+      paidInput.value = total;
+    } else if (statusSelect.value === "belum") {
+      paidInput.value = 0;
+    }
+  } else {
+    const paid = Math.max(0, Number(paidInput.value) || 0);
+    if (total > 0 && paid >= total) {
+      statusSelect.value = "lunas";
+    } else if (paid > 0) {
+      statusSelect.value = "dp";
+    } else {
+      statusSelect.value = "belum";
+    }
+  }
+
+  updateSummaryUI();
 }
 
 // Simpan Transaksi Lengkap ke Database
@@ -385,6 +448,7 @@ async function handleSimpanTransaksi(e) {
   const tanggalMasuk = document.getElementById("tanggalMasuk").value;
   const estimasiSelesai = document.getElementById("estimasiSelesai").value;
   const statusBayar = document.getElementById("statusBayarSelect").value;
+  const jumlahDibayar = Number(document.getElementById("jumlahDibayarInput")?.value) || 0;
   const metodePenyerahan = document.getElementById("metodePenyerahan")?.value || "antar";
   const totalHarga = Number(document.getElementById("totalHargaInput").value) || 0;
   const catatan = document.getElementById("catatanTrans")?.value.trim() || "";
@@ -393,6 +457,9 @@ async function handleSimpanTransaksi(e) {
     showToast("Nama dan nomor WhatsApp pelanggan wajib diisi.", "warning");
     return;
   }
+
+  // Task 4 — status & nominal pembayaran selalu konsisten
+  const payment = normalizePayment(statusBayar, totalHarga, jumlahDibayar);
 
   if (keranjangPakaian.length === 0) {
     if (!confirm("Pakaian belum dicatat satu per satu. Tetap ingin menyimpan transaksi ini?")) {
@@ -413,7 +480,8 @@ async function handleSimpanTransaksi(e) {
       berat,
       estimasiSelesai,
       status: "masuk",
-      statusBayar,
+      statusBayar: payment.statusBayar,
+      jumlahDibayar: payment.jumlahDibayar,
       metodePenyerahan,
       totalHarga,
       catatan,
@@ -438,13 +506,11 @@ async function handleSimpanTransaksi(e) {
     showToast(`Transaksi ${trxId} berhasil disimpan!`, "success");
 
     // Tampilkan Modal Sukses dengan opsi Cetak & Kirim WA
-    const waText = encodeURIComponent(
-      `Halo Kak ${nama},\nTerima kasih telah mempercayakan pakaian Anda di KIA Laundry (Clean & Fresh).\n\nNo. Nota: ${trxId}\nLayanan: ${layanan.toUpperCase()}\nEstimasi Selesai: ${formatTanggal(
-        estimasiSelesai,
-        true
-      )}\nTotal: ${formatRupiah(totalHarga)} (${statusBayar.toUpperCase()})\n\nCatatan pakaian & foto dokumentasi telah aman tersimpan di sistem kami. Salam bersih & segar!`
-    );
-    const waUrl = `https://wa.me/62${noHp.replace(/^0/, "")}?text=${waText}`;
+    // Task 4 — pesan WhatsApp tahap 1 memakai template yang bisa diedit di Pengaturan
+    const waUrl =
+      typeof buildWaUrl === "function"
+        ? buildWaUrl("masuk", transaksiObj, activeSettings, keranjangPakaian)
+        : "";
 
     showModal(
       "Transaksi Berhasil Disimpan",
@@ -471,7 +537,11 @@ async function handleSimpanTransaksi(e) {
           label: "Kirim WhatsApp",
           className: "btn-success",
           onClick: () => {
-            window.open(waUrl, "_blank");
+            if (!waUrl) {
+              showToast("Nomor WhatsApp pelanggan tidak valid.", "warning");
+              return;
+            }
+            window.open(waUrl, "_blank", "noopener");
           }
         },
         {

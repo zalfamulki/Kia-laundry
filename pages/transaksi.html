@@ -224,6 +224,12 @@
                 </select>
               </div>
 
+              <div class="form-group" id="jumlahDibayarGroup">
+                <label class="form-label" for="jumlahDibayarInput">Jumlah Dibayar (Rp)</label>
+                <input type="number" id="jumlahDibayarInput" class="form-control" min="0" step="500" value="0">
+                <div class="form-help">Belum Bayar = 0, Lunas = total penuh. Isi nominal untuk DP; sisa tagihan dihitung otomatis.</div>
+              </div>
+
               <div class="form-group">
                 <label class="form-label" for="metodePenyerahan">Metode Penyerahan</label>
                 <select id="metodePenyerahan" class="form-select">
@@ -258,6 +264,14 @@
                   <span>Total Tagihan:</span>
                   <span id="sumTotal" style="color:var(--primary);">Rp 0</span>
                 </div>
+                <div class="price-summary-row" style="margin-top:0.5rem;">
+                  <span style="color:var(--text-muted);">Dibayar:</span>
+                  <strong id="sumDibayar">Rp 0</strong>
+                </div>
+                <div class="price-summary-row">
+                  <span style="color:var(--text-muted);">Sisa Tagihan:</span>
+                  <strong id="sumSisa">Rp 0</strong>
+                </div>
               </div>
             </div>
 
@@ -281,6 +295,7 @@
   <script src="../lib/dexie.min.js"></script>
   <script src="../js/db.js"></script>
   <script src="../js/ui.js"></script>
+  <script src="../js/wa.js"></script>
   <script src="../js/mode.js"></script>
   <script src="../js/kamera.js"></script>
   <script src="../js/transaksi.js"></script>

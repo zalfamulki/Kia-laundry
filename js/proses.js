@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderNav("proses");
   renderFooter();
   setupProsesLightbox();
+  setupStageTabs();
 
   const btnAllSelesai = document.getElementById("btnLihatSemuaSelesai");
   if (btnAllSelesai) btnAllSelesai.addEventListener("click", openSelesaiSemuaModal);
@@ -62,6 +63,9 @@ function renderActiveStage(stage) {
 
   const badge = document.getElementById(`count_${stage.key}`);
   if (badge) badge.textContent = stageTrx.length;
+
+  const tabBadge = document.getElementById(`tabCount_${stage.key}`);
+  if (tabBadge) tabBadge.textContent = stageTrx.length;
 
   const container = document.getElementById(`col_${stage.key}`);
   if (!container) return;
@@ -107,7 +111,6 @@ function renderProsesCard(trx, stage) {
         </div>
         <div class="proses-price">
           <strong>${formatRupiah(trx.totalHarga)}</strong>
-          ${getBayarBadge(trx.statusBayar)}
         </div>
       </div>
 
@@ -157,7 +160,7 @@ function renderSelesaiTable() {
           <div class="selesai-actions">
             ${
               trx.statusBayar !== "lunas"
-                ? `<button type="button" class="btn btn-sm btn-success" onclick="markProsesLunas('${escapeHtml(trx.id)}')" title="Tandai pembayaran lunas">Lunas</button>`
+                ? `<button type="button" class="btn btn-sm btn-outline-success" onclick="markProsesLunas('${escapeHtml(trx.id)}')" title="Tandai pembayaran lunas">Lunas</button>`
                 : ""
             }
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
@@ -227,6 +230,7 @@ async function markProsesLunas(trxId) {
   try {
     await db.transaksi.update(trxId, {
       statusBayar: "lunas",
+      jumlahDibayar: Number(trx.totalHarga) || 0,
       updatedAt: new Date().toISOString()
     });
     showToast(`Pembayaran ${trxId} berhasil ditandai lunas.`, "success");
@@ -276,13 +280,23 @@ function openChecklistModal(trx) {
     <div style="max-height:50vh; overflow-y:auto; margin-bottom:1rem;">
       ${itemsHtml}
     </div>
-    <div style="background:#f1f5f9; padding:0.85rem; border-radius:8px; display:flex; justify-content:space-between; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-      <span style="font-weight:700; font-size:0.875rem;">Status Bayar:</span>
-      <select id="checklistStatusBayar" class="form-select" style="width:auto; padding:0.35rem 0.75rem; font-size:0.85rem;">
-        <option value="lunas" ${trx.statusBayar === "lunas" ? "selected" : ""}>Lunas Sekarang</option>
-        <option value="dp" ${trx.statusBayar === "dp" ? "selected" : ""}>DP (Ada Sisa)</option>
-        <option value="belum" ${trx.statusBayar === "belum" ? "selected" : ""}>Belum Bayar</option>
-      </select>
+    <div class="checklist-payment">
+      <div class="checklist-payment-row">
+        <span>Total tagihan</span>
+        <strong>${formatRupiah(getPaymentInfo(trx).total)}</strong>
+      </div>
+      <div class="checklist-payment-row">
+        <span>Sudah dibayar</span>
+        <strong>${formatRupiah(getPaymentInfo(trx).dibayar)}</strong>
+      </div>
+      <div class="checklist-payment-row is-sisa">
+        <span>Sisa tagihan</span>
+        <strong>${formatRupiah(getPaymentInfo(trx).sisa)}</strong>
+      </div>
+      <p class="checklist-payment-note">
+        Status pembayaran tidak diubah di sini. Setelah cucian masuk tabel <strong>Selesai</strong>,
+        pilih <strong>Lunas</strong> atau buka <strong>Lihat Detail</strong>.
+      </p>
     </div>
     `,
     [
@@ -299,10 +313,7 @@ function openChecklistModal(trx) {
             }
           }
 
-          const bayarSelect = document.getElementById("checklistStatusBayar");
-          const finalStatusBayar = bayarSelect ? bayarSelect.value : trx.statusBayar;
-
-          await finalizeSerahkanCucian(trx.id, finalStatusBayar);
+          await finalizeSerahkanCucian(trx.id);
           close();
         }
       },
@@ -328,11 +339,11 @@ function openChecklistModal(trx) {
 }
 
 // Finalisasi Penyerahan Cucian
-async function finalizeSerahkanCucian(trxId, statusBayar = "lunas") {
+// Status pembayaran TIDAK diubah di sini; keputusan Lunas dilakukan dari tabel Selesai.
+async function finalizeSerahkanCucian(trxId) {
   const now = new Date().toISOString();
   await db.transaksi.update(trxId, {
     status: "diambil",
-    statusBayar: statusBayar,
     diambilAt: now,
     updatedAt: now
   });
@@ -355,6 +366,7 @@ function openProsesDetail(trxId) {
   const totalPcs = items.reduce((sum, p) => sum + (Number(p.jumlah) || 1), 0);
   const fotoCount = items.filter(hasItemPhoto).length;
   const metode = getMetodePenyerahan(trx);
+  const pay = getPaymentInfo(trx);
 
   const itemsHtml = items
     .map((p, idx) => {
@@ -378,6 +390,14 @@ function openProsesDetail(trxId) {
             </div>
             <div class="proses-detail-condition">
               <strong>Kondisi:</strong> ${escapeHtml(p.kondisi || "Baik tanpa catatan cacat")}
+            </div>
+            <div class="proses-detail-item-actions">
+              ${
+                hasItemPhoto(p)
+                  ? `<button type="button" class="btn btn-sm btn-outline-danger js-proses-hapus-foto" data-pkn-id="${escapeHtml(p.id)}">Hapus Foto</button>`
+                  : ""
+              }
+              <button type="button" class="btn btn-sm btn-danger js-proses-hapus-item" data-pkn-id="${escapeHtml(p.id)}">Hapus Item</button>
             </div>
           </div>
         </div>
@@ -412,6 +432,14 @@ function openProsesDetail(trxId) {
       <div>
         <div class="proses-detail-label">Pembayaran</div>
         <div class="proses-detail-value">${getBayarBadge(trx.statusBayar)}</div>
+      </div>
+      <div>
+        <div class="proses-detail-label">Sudah Dibayar</div>
+        <div class="proses-detail-value">${formatRupiah(pay.dibayar)}</div>
+      </div>
+      <div>
+        <div class="proses-detail-label">Sisa Tagihan</div>
+        <div class="proses-detail-value" style="color:${pay.sisa > 0 ? "#b91c1c" : "#047857"};">${formatRupiah(pay.sisa)}</div>
       </div>
       <div>
         <div class="proses-detail-label">Metode</div>
@@ -459,7 +487,7 @@ function openProsesDetail(trxId) {
   if (trx.statusBayar !== "lunas") {
     buttons.push({
       label: "Tandai Lunas",
-      className: "btn-success",
+      className: "btn-outline-success",
       onClick: async (close) => {
         const updated = await markProsesLunas(trx.id);
         if (updated) close();
@@ -491,6 +519,69 @@ function openProsesDetail(trxId) {
       openProsesLightbox(Number(btn.getAttribute("data-foto-index")));
     });
   });
+
+  document.querySelectorAll(".js-proses-hapus-foto").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      hapusFotoItemProses(btn.getAttribute("data-pkn-id"), trx.id);
+    });
+  });
+
+  document.querySelectorAll(".js-proses-hapus-item").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      hapusItemProses(btn.getAttribute("data-pkn-id"), trx.id);
+    });
+  });
+}
+
+// Task 4 — hapus foto/item langsung dari detail Proses
+async function hapusFotoItemProses(pknId, trxId) {
+  const item = getItems(trxId).find((p) => p.id === pknId);
+  if (!item) {
+    showToast("Item pakaian tidak ditemukan.", "error");
+    return;
+  }
+
+  if (!confirm(`Hapus foto "${item.jenis || "pakaian"}"?\n\nData teks item tetap tersimpan, hanya fotonya yang dihapus.`)) {
+    return;
+  }
+
+  try {
+    await hapusFotoPakaian(pknId);
+    await loadProsesBoard();
+    closeModal();
+    openProsesDetail(trxId);
+    showToast("Foto item berhasil dihapus.", "success");
+  } catch (err) {
+    console.error("Gagal menghapus foto item:", err);
+    showToast("Gagal menghapus foto: " + err.message, "error");
+  }
+}
+
+async function hapusItemProses(pknId, trxId) {
+  const item = getItems(trxId).find((p) => p.id === pknId);
+  if (!item) {
+    showToast("Item pakaian tidak ditemukan.", "error");
+    return;
+  }
+
+  if (
+    !confirm(
+      `Hapus item "${item.jenis || "pakaian"}" (${Number(item.jumlah) || 1} pcs) dari nota ${trxId}?\n\nTindakan ini tidak bisa dibatalkan. Total harga transaksi tidak berubah otomatis.`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await hapusPakaianItem(pknId);
+    await loadProsesBoard();
+    closeModal();
+    openProsesDetail(trxId);
+    showToast("Item pakaian berhasil dihapus.", "success");
+  } catch (err) {
+    console.error("Gagal menghapus item pakaian:", err);
+    showToast("Gagal menghapus item: " + err.message, "error");
+  }
 }
 
 // Modal semua transaksi selesai
@@ -514,7 +605,7 @@ function openSelesaiSemuaModal() {
           <div class="selesai-actions">
             ${
               trx.statusBayar !== "lunas"
-                ? `<button type="button" class="btn btn-sm btn-success js-lunas-selesai-modal" data-trx-id="${escapeHtml(trx.id)}" title="Tandai pembayaran lunas">Lunas</button>`
+                ? `<button type="button" class="btn btn-sm btn-outline-success js-lunas-selesai-modal" data-trx-id="${escapeHtml(trx.id)}" title="Tandai pembayaran lunas">Lunas</button>`
                 : ""
             }
             <button type="button" class="btn btn-sm btn-outline-primary" onclick="openProsesDetail('${escapeHtml(trx.id)}')">
@@ -590,55 +681,8 @@ function kirimWhatsApp(trxId) {
 }
 
 function buildProsesWaUrl(trx) {
-  const phone = normalizeWhatsAppPhone(trx.noHp);
-  if (!phone) return "";
-
-  const isAntar = getMetodePenyerahan(trx) === "antar";
-  const lines = [
-    `Halo Kak ${trx.namaCustomer || ""}, cucian Anda di KIA Laundry sudah siap${isAntar ? " dan akan kami antar." : " dan sudah bisa diambil."}`,
-    "",
-    `No. Nota: ${trx.id}`,
-    `Layanan: ${formatLayananLabel(trx.layanan)}`,
-    `Total: ${formatRupiah(trx.totalHarga)} (${formatStatusBayarText(trx.statusBayar)})`
-  ];
-
-  if (isAntar) {
-    lines.push(`Alamat: ${trx.alamat || "(belum diisi)"}`);
-    lines.push("", "Mohon konfirmasi jika alamat sudah sesuai. Terima kasih.");
-  } else {
-    lines.push(`Lokasi ambil: ${activeSettings.alamat || "KIA Laundry"}`);
-    lines.push("", "Silakan diambil pada jam operasional. Terima kasih.");
-  }
-
-  return `https://wa.me/${phone}?text=${encodeURIComponent(lines.join("\n"))}`;
-}
-
-function normalizeWhatsAppPhone(value) {
-  let digits = String(value || "").replace(/\D/g, "");
-  if (!digits) return "";
-  if (digits.startsWith("62")) return digits;
-  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
-  if (digits.startsWith("8")) return `62${digits}`;
-  return digits;
-}
-
-function formatStatusBayarText(status) {
-  return {
-    lunas: "Lunas",
-    dp: "DP",
-    belum: "Belum Bayar"
-  }[status] || "Belum Bayar";
-}
-
-function formatLayananLabel(layanan) {
-  const key = String(layanan || "").toLowerCase();
-  const labels = {
-    cuci: "Cuci",
-    setrika: "Setrika",
-    "cuci-setrika": "Cuci + Setrika",
-    satuan: "Satuan"
-  };
-  return labels[key] || layanan || "-";
+  if (typeof buildWaUrl !== "function") return "";
+  return buildWaUrl("siap", trx, activeSettings, getItems(trx.id));
 }
 
 function getMetodePenyerahan(trx) {
@@ -656,6 +700,46 @@ function hasItemPhoto(p) {
 function getTime(value) {
   const time = new Date(value || 0).getTime();
   return Number.isNaN(time) ? 0 : time;
+}
+
+// Task 4 — tab tahap sticky untuk mobile
+function setupStageTabs() {
+  const tabs = Array.from(document.querySelectorAll(".proses-stage-tab"));
+  if (tabs.length === 0) return;
+
+  const setActive = (stageKey) => {
+    tabs.forEach((tab) => {
+      const active = tab.getAttribute("data-stage") === stageKey;
+      tab.classList.toggle("is-active", active);
+      tab.setAttribute("aria-selected", active ? "true" : "false");
+    });
+  };
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      const stageKey = tab.getAttribute("data-stage");
+      const column = document.querySelector(`.kanban-column[data-stage="${stageKey}"]`);
+      setActive(stageKey);
+      if (column) {
+        column.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+
+  if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActive(visible.target.getAttribute("data-stage"));
+      },
+      { rootMargin: "-130px 0px -55% 0px", threshold: [0, 0.25, 0.5] }
+    );
+    document.querySelectorAll(".kanban-column[data-stage]").forEach((col) => {
+      observer.observe(col);
+    });
+  }
 }
 
 // Lightbox foto detail pesanan

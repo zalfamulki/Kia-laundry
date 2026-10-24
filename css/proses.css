@@ -7,17 +7,18 @@
 .kanban-board {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.9rem;
+  gap: 0.7rem;
   align-items: start;
-  padding-bottom: 1.25rem;
+  padding-bottom: 1rem;
 }
 
 .kanban-column {
   background: var(--bg-muted);
   border-radius: var(--radius-xl);
-  padding: 0.9rem;
+  padding: 0.65rem;
   border: 1px solid var(--border-light);
   min-width: 0;
+  scroll-margin-top: 70px;
 }
 
 .kanban-column.is-ready {
@@ -30,8 +31,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  margin-bottom: 0.75rem;
-  padding-bottom: 0.6rem;
+  margin-bottom: 0.55rem;
+  padding-bottom: 0.45rem;
   border-bottom: 2px solid var(--border-medium);
 }
 
@@ -80,10 +81,10 @@
 .proses-card {
   background: #ffffff;
   border-radius: var(--radius-lg);
-  padding: 0.7rem;
+  padding: 0.55rem;
   border: 1px solid var(--border-light);
   box-shadow: var(--shadow-sm);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.45rem;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -105,7 +106,7 @@
 }
 
 .proses-customer {
-  font-size: 0.86rem;
+  font-size: 0.84rem;
   font-weight: 800;
   color: var(--text-main);
   white-space: nowrap;
@@ -117,8 +118,8 @@
   display: flex;
   align-items: center;
   gap: 0.28rem;
-  margin-top: 0.18rem;
-  font-size: 0.68rem;
+  margin-top: 0.15rem;
+  font-size: 0.64rem;
   color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -159,7 +160,7 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  margin-top: 0.45rem;
+  margin-top: 0.35rem;
 }
 
 .proses-method {
@@ -193,9 +194,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.55rem;
-  padding-top: 0.5rem;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
   border-top: 1px dashed var(--border-light);
 }
 
@@ -204,9 +205,9 @@
   align-items: center;
   justify-content: center;
   gap: 0.2rem;
-  padding: 0.28rem 0.5rem;
+  padding: 0.24rem 0.42rem;
   border-radius: 6px;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   line-height: 1.2;
   white-space: nowrap;
@@ -232,11 +233,11 @@
    TABEL SELESAI RINGKAS
    ======================================================== */
 .selesai-section {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
   background: #ffffff;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  padding: 1rem 1.1rem;
+  padding: 0.8rem 0.9rem;
   box-shadow: var(--shadow-sm);
 }
 
@@ -246,7 +247,7 @@
   justify-content: space-between;
   gap: 1rem;
   flex-wrap: wrap;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.5rem;
 }
 
 .selesai-title {
@@ -290,8 +291,8 @@
 }
 
 .selesai-table td {
-  padding: 0.55rem 0.75rem;
-  font-size: 0.79rem;
+  padding: 0.45rem 0.6rem;
+  font-size: 0.76rem;
 }
 
 .selesai-table .btn {
@@ -603,6 +604,64 @@ body.proses-lightbox-open {
   accent-color: #10b981;
 }
 
+/* ========================================================
+   TAB TAHAP (MOBILE STICKY)
+   ======================================================== */
+.proses-stage-tabs {
+  display: none;
+}
+
+/* ========================================================
+   RINGKASAN PEMBAYARAN PADA CHECKLIST SERAH TERIMA
+   ======================================================== */
+.checklist-payment {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  padding: 0.8rem 0.9rem;
+}
+
+.checklist-payment-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  font-size: 0.85rem;
+  padding: 0.2rem 0;
+}
+
+.checklist-payment-row strong {
+  color: var(--text-main);
+}
+
+.checklist-payment-row.is-sisa {
+  color: #b91c1c;
+}
+
+.checklist-payment-note {
+  margin-top: 0.55rem;
+  padding-top: 0.55rem;
+  border-top: 1px dashed #cbd5e1;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+/* Aksi hapus foto/item di detail Proses */
+.proses-detail-item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+  padding-top: 0.45rem;
+  border-top: 1px dashed var(--border-light);
+}
+
+.proses-detail-item-actions .btn {
+  padding: 0.22rem 0.42rem;
+  font-size: 0.65rem;
+}
+
 @media (max-width: 1100px) {
   .kanban-board {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -612,6 +671,57 @@ body.proses-lightbox-open {
 @media (max-width: 700px) {
   .kanban-board {
     grid-template-columns: 1fr;
+  }
+
+  .proses-stage-tabs {
+    display: flex;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    gap: 0.3rem;
+    padding: 0.45rem 0;
+    margin-bottom: 0.4rem;
+    background: var(--bg-page);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .proses-stage-tab {
+    flex: 1 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    padding: 0.45rem 0.6rem;
+    border: 1px solid var(--border-medium);
+    border-radius: var(--radius-full);
+    background: #ffffff;
+    color: var(--text-body);
+    font-size: 0.75rem;
+    font-weight: 700;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .proses-stage-tab.is-active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: #ffffff;
+  }
+
+  .proses-stage-count {
+    min-width: 20px;
+    padding: 0.05rem 0.35rem;
+    border-radius: var(--radius-full);
+    background: var(--bg-muted);
+    color: var(--text-main);
+    font-size: 0.66rem;
+    text-align: center;
+  }
+
+  .proses-stage-tab.is-active .proses-stage-count {
+    background: rgba(255, 255, 255, 0.25);
+    color: #ffffff;
   }
 
   .selesai-section {

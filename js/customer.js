@@ -73,7 +73,11 @@ function renderCustomerTable(list) {
         .join("")
         .toUpperCase();
 
-      const waUrl = `https://wa.me/62${(c.noHp || "").replace(/^0/, "")}`;
+      const waPhone =
+        typeof normalizeWhatsAppPhone === "function"
+          ? normalizeWhatsAppPhone(c.noHp)
+          : String(c.noHp || "").replace(/\D/g, "").replace(/^0/, "62");
+      const waUrl = waPhone ? `https://wa.me/${waPhone}` : "#";
 
       return `
         <tr>
@@ -154,20 +158,29 @@ function openCustomerDetail(customerId) {
     .join("");
 
   const pknGrid = historyPkn
-    .slice(0, 8)
+    .slice(0, 12)
     .map(
       (p) => `
-      <div style="border:1px solid #e2e8f0; border-radius:8px; overflow:hidden; background:#fff;">
-        <img src="${p.fotoThumb || p.foto || '../assets/icon.svg'}" style="width:100%; height:90px; object-fit:cover;">
+      <div class="customer-foto-card">
+        <img src="${p.fotoThumb || p.foto || '../assets/icon.svg'}" alt="Foto ${escapeHtml(p.jenis || "pakaian")}" style="width:100%; height:90px; object-fit:cover;">
+        ${
+          p.foto || p.fotoThumb
+            ? `<button type="button" class="customer-foto-delete js-customer-hapus-foto" data-pkn-id="${escapeHtml(p.id)}" title="Hapus foto ${escapeHtml(p.jenis || "pakaian")}" aria-label="Hapus foto">&times;</button>`
+            : ""
+        }
         <div style="padding:0.4rem; font-size:0.75rem;">
-          <strong>${p.jenis}</strong> (${p.warna || '-'})
+          <strong>${escapeHtml(p.jenis || "-")}</strong> (${escapeHtml(p.warna || "-")})
         </div>
       </div>
     `
     )
     .join("");
 
-  const waUrl = `https://wa.me/62${(cus.noHp || "").replace(/^0/, "")}`;
+  const waPhone =
+    typeof normalizeWhatsAppPhone === "function"
+      ? normalizeWhatsAppPhone(cus.noHp)
+      : String(cus.noHp || "").replace(/\D/g, "").replace(/^0/, "62");
+  const waUrl = waPhone ? `https://wa.me/${waPhone}` : "";
 
   showModal(
     `Profil Pelanggan: ${cus.nama}`,
@@ -206,13 +219,57 @@ function openCustomerDetail(customerId) {
       {
         label: "Chat WhatsApp",
         className: "btn-success",
-        onClick: () => window.open(waUrl, "_blank")
+        onClick: () => {
+          if (!waUrl) {
+            showToast("Nomor WhatsApp pelanggan tidak valid.", "warning");
+            return;
+          }
+          window.open(waUrl, "_blank", "noopener");
+        }
       },
       {
         label: "Tutup",
         className: "btn-outline",
         onClick: (close) => close()
       }
-    ]
+    ],
+    {
+      size: "lg",
+      onOpen: () => {
+        document.querySelectorAll(".js-customer-hapus-foto").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            hapusFotoCustomer(btn.getAttribute("data-pkn-id"), customerId);
+          });
+        });
+      }
+    }
   );
+}
+
+// Task 4 — hapus foto pakaian langsung dari profil pelanggan
+async function hapusFotoCustomer(pknId, customerId) {
+  const item = pakaianList.find((p) => p.id === pknId);
+  if (!item) {
+    showToast("Item pakaian tidak ditemukan.", "error");
+    return;
+  }
+
+  if (
+    !confirm(
+      `Hapus foto "${item.jenis || "pakaian"}" milik pelanggan ini?\n\nData teks pakaian tetap tersimpan, hanya fotonya yang dihapus.`
+    )
+  ) {
+    return;
+  }
+
+  try {
+    await hapusFotoPakaian(pknId);
+    await loadCustomerData();
+    closeModal();
+    openCustomerDetail(customerId);
+    showToast("Foto pakaian berhasil dihapus.", "success");
+  } catch (err) {
+    console.error("Gagal menghapus foto pakaian:", err);
+    showToast("Gagal menghapus foto: " + err.message, "error");
+  }
 }

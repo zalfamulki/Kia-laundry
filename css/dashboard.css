@@ -940,3 +940,117 @@
     justify-content: center;
   }
 }
+
+/* ========================================================
+   TAGIHAN BELUM LUNAS (Task 4)
+   ======================================================== */
+.belum-lunas-section {
+  margin: 1.5rem 0 0.5rem;
+  background: #ffffff;
+  border: 1px solid #fecaca;
+  border-left: 4px solid #ef4444;
+  border-radius: var(--radius-xl);
+  padding: 1rem 1.15rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.belum-lunas-section[hidden] {
+  display: none;
+}
+
+.belum-lunas-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.belum-lunas-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.belum-lunas-sub {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-top: 0.15rem;
+}
+
+.belum-lunas-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fef2f2;
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.82rem;
+  color: #991b1b;
+}
+
+.belum-lunas-total strong {
+  font-size: 0.95rem;
+}
+
+.belum-lunas-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.belum-lunas-item:last-of-type {
+  border-bottom: 0;
+}
+
+.belum-lunas-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.belum-lunas-name {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
+.belum-lunas-meta {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.belum-lunas-amount {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #b91c1c;
+  white-space: nowrap;
+}
+
+.belum-lunas-more {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.belum-lunas-more a {
+  color: var(--primary);
+}
+
+@media (max-width: 640px) {
+  .belum-lunas-item {
+    flex-wrap: wrap;
+  }
+
+  .belum-lunas-info {
+    flex: 1 0 100%;
+  }
+}

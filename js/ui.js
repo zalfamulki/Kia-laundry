@@ -116,6 +116,7 @@ function renderNav(activeKey = "dashboard") {
   }
 
   updateModeBadge();
+  renderAppReminders();
 }
 
 // Render Footer & CTA Banner
@@ -225,6 +226,117 @@ function updateModeBadge() {
 window.addEventListener("online", updateModeBadge);
 window.addEventListener("offline", updateModeBadge);
 
+// ============================================================
+// Task 4 — Pengingat backup harian & laporan bulanan
+// ============================================================
+
+const REMINDER_BACKUP_DISMISS_KEY = "kia_reminder_backup_dismissed";
+const REMINDER_LAPORAN_DISMISS_KEY = "kia_reminder_laporan_dismissed";
+const LAST_BACKUP_KEY = "kia_auto_backup_last";
+const LAST_LAPORAN_EXPORT_KEY = "kia_laporan_last_export";
+
+function localDateKey(date = new Date()) {
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+function daysSinceDate(isoString) {
+  const then = new Date(isoString);
+  if (Number.isNaN(then.getTime())) return null;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  then.setHours(0, 0, 0, 0);
+  return Math.max(0, Math.floor((today.getTime() - then.getTime()) / 86400000));
+}
+
+function renderAppReminders() {
+  const main = document.querySelector("main");
+  if (!main) return;
+
+  let host = document.getElementById("appReminders");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "appReminders";
+    host.className = "app-reminders";
+    main.insertBefore(host, main.firstChild);
+  }
+
+  const base = getBasePath();
+  const today = localDateKey();
+  const banners = [];
+
+  // 1. Backup harian (data hanya ada di cache browser)
+  const lastBackup = localStorage.getItem(LAST_BACKUP_KEY);
+  const backupDays = lastBackup ? daysSinceDate(lastBackup) : null;
+  const backupDismissed =
+    localStorage.getItem(REMINDER_BACKUP_DISMISS_KEY) === today;
+
+  if (!backupDismissed && (backupDays === null || backupDays >= 1)) {
+    const critical = backupDays === null || backupDays >= 7;
+    const detail =
+      backupDays === null
+        ? "Belum pernah ada backup."
+        : `Terakhir backup ${backupDays} hari lalu.`;
+
+    banners.push(`
+      <div class="app-reminder ${critical ? "is-critical" : ""}" role="status">
+        <div class="app-reminder-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </div>
+        <div class="app-reminder-text">
+          <strong>${critical ? "Backup data sudah mendesak" : "Waktunya backup harian"}</strong>
+          <span>${detail} Data hanya tersimpan di cache browser ini. Unduh backup JSON agar transaksi, foto, dan data pelanggan tidak hilang.</span>
+        </div>
+        <div class="app-reminder-actions">
+          <a class="btn btn-sm ${critical ? "btn-danger" : "btn-primary"}" href="${base}pages/backup.html">Backup Sekarang</a>
+          <button type="button" class="app-reminder-close" data-dismiss="backup" aria-label="Tutup pengingat backup">&times;</button>
+        </div>
+      </div>
+    `);
+  }
+
+  // 2. Laporan bulanan (tanggal 25 sampai akhir bulan)
+  const now = new Date();
+  const monthKey = today.slice(0, 7);
+  const lastExport = localStorage.getItem(LAST_LAPORAN_EXPORT_KEY);
+  const exportedThisMonth = Boolean(lastExport && lastExport.slice(0, 7) === monthKey);
+  const laporanDismissed =
+    localStorage.getItem(REMINDER_LAPORAN_DISMISS_KEY) === today;
+
+  if (now.getDate() >= 25 && !exportedThisMonth && !laporanDismissed) {
+    banners.push(`
+      <div class="app-reminder is-report" role="status">
+        <div class="app-reminder-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        </div>
+        <div class="app-reminder-text">
+          <strong>Laporan bulan ini belum diunduh</strong>
+          <span>Sudah masuk tanggal 25. Unduh laporan keuangan bulan ini sebagai arsip sebelum bulan berganti.</span>
+        </div>
+        <div class="app-reminder-actions">
+          <a class="btn btn-sm btn-primary" href="${base}pages/laporan.html">Buka Laporan</a>
+          <button type="button" class="app-reminder-close" data-dismiss="laporan" aria-label="Tutup pengingat laporan">&times;</button>
+        </div>
+      </div>
+    `);
+  }
+
+  host.innerHTML = banners.join("");
+  host.hidden = banners.length === 0;
+
+  host.querySelectorAll("[data-dismiss]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const kind = btn.getAttribute("data-dismiss");
+      const key =
+        kind === "backup"
+          ? REMINDER_BACKUP_DISMISS_KEY
+          : REMINDER_LAPORAN_DISMISS_KEY;
+      localStorage.setItem(key, today);
+      renderAppReminders();
+    });
+  });
+}
+
 // Toast Notification
 function showToast(message, type = "info") {
   let container = document.getElementById("toastContainer");
@@ -263,6 +375,30 @@ function showToast(message, type = "info") {
 }
 
 // Modal Dialog
+let modalBehaviorBound = false;
+
+function ensureModalBehavior(backdrop) {
+  if (!backdrop) return;
+
+  if (!backdrop.dataset.overlayBound) {
+    backdrop.dataset.overlayBound = "1";
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+  }
+
+  if (modalBehaviorBound) return;
+  modalBehaviorBound = true;
+
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+    // Lightbox punya handler sendiri; jangan tutup modal di belakangnya.
+    if (document.querySelector(".proses-lightbox.show, .foto-lightbox.show")) return;
+    const b = document.getElementById("customModalBackdrop");
+    if (b && b.classList.contains("show")) closeModal();
+  });
+}
+
 function showModal(title, contentHtml, buttons = [], options = {}) {
   let backdrop = document.getElementById("customModalBackdrop");
   if (!backdrop) {
@@ -271,6 +407,8 @@ function showModal(title, contentHtml, buttons = [], options = {}) {
     backdrop.className = "modal-backdrop";
     document.body.appendChild(backdrop);
   }
+
+  ensureModalBehavior(backdrop);
 
   const footerButtonsHtml = buttons.map((btn, idx) => `
     <button type="button" class="btn ${btn.className || 'btn-outline'}" id="modalBtn_${idx}">
@@ -306,6 +444,10 @@ function showModal(title, contentHtml, buttons = [], options = {}) {
   });
 
   backdrop.classList.add("show");
+
+  if (typeof options.onOpen === "function") {
+    options.onOpen(backdrop);
+  }
 }
 
 function closeModal() {
@@ -368,12 +510,54 @@ function getBayarBadge(statusBayar) {
   return `<span class="badge ${item.class}">${item.label}</span>`;
 }
 
+// Normalisasi nomor WhatsApp ke format internasional 62.
+// Dipakai semua halaman agar tautan WA selalu konsisten.
+function normalizeWhatsAppPhone(value) {
+  let digits = String(value || "").replace(/\D/g, "");
+  if (!digits) return "";
+  if (digits.startsWith("62")) return digits;
+  if (digits.startsWith("0")) return `62${digits.slice(1)}`;
+  if (digits.startsWith("8")) return `62${digits}`;
+  return digits;
+}
+
+function formatStatusBayarText(status, trx = null) {
+  const key = status || trx?.statusBayar || "belum";
+  if (key === "lunas") return "Lunas";
+  if (key === "dp") {
+    const paid = trx && typeof getJumlahDibayar === "function" ? getJumlahDibayar(trx) : 0;
+    return paid > 0 ? `DP (dibayar ${formatRupiah(paid)})` : "DP";
+  }
+  return "Belum Bayar";
+}
+
+function formatLayananLabel(layanan) {
+  const key = String(layanan || "").toLowerCase();
+  const labels = {
+    cuci: "Cuci",
+    setrika: "Setrika",
+    "cuci-setrika": "Cuci + Setrika",
+    satuan: "Satuan"
+  };
+  return labels[key] || layanan || "-";
+}
+
 // Cetak Struk Nota POS
 function cetakNotaStruk(transaksi, pakaianList = [], settings = {}) {
   const printWindow = window.open("", "_blank", "width=400,height=600");
   const namaToko = settings.namaLaundry || "KIA LAUNDRY";
   const alamat = settings.alamat || "Layanan Antar Jemput";
   const noHp = settings.noHp1 || "085179591769";
+  const kasir = settings.kasir || "Kasir";
+  const pay =
+    typeof getPaymentInfo === "function"
+      ? getPaymentInfo(transaksi)
+      : {
+          total: Number(transaksi.totalHarga) || 0,
+          dibayar: transaksi.statusBayar === "lunas" ? Number(transaksi.totalHarga) || 0 : Number(transaksi.jumlahDibayar) || 0,
+          sisa: 0,
+          statusBayar: transaksi.statusBayar || "belum"
+        };
 
   const rowsHtml = pakaianList.map(p => `
     <tr>
@@ -415,8 +599,9 @@ function cetakNotaStruk(transaksi, pakaianList = [], settings = {}) {
       <div>No. Nota  : <strong>${transaksi.id}</strong></div>
       <div>Tanggal   : ${formatTanggal(transaksi.tanggalMasuk, true)}</div>
       <div>Pelanggan : ${transaksi.namaCustomer} (${transaksi.noHp})</div>
-      <div>Layanan   : ${transaksi.layanan.toUpperCase()}</div>
+      <div>Layanan   : ${String(transaksi.layanan || "-").toUpperCase()}</div>
       <div>Est. Selesai: ${formatTanggal(transaksi.estimasiSelesai, true)}</div>
+      <div>Kasir     : ${kasir}</div>
       <div class="line"></div>
       <table>
         <thead>
@@ -433,16 +618,25 @@ function cetakNotaStruk(transaksi, pakaianList = [], settings = {}) {
       ${transaksi.berat ? `<div>Berat: ${transaksi.berat} Kg</div>` : ''}
       <div style="font-size: 13px; font-weight: bold; display: flex; justify-content: space-between;">
         <span>TOTAL:</span>
-        <span>${formatRupiah(transaksi.totalHarga)}</span>
+        <span>${formatRupiah(pay.total)}</span>
       </div>
       <div style="display: flex; justify-content: space-between;">
         <span>STATUS BAYAR:</span>
-        <span>${(transaksi.statusBayar || '').toUpperCase()}</span>
+        <span>${formatStatusBayarText(pay.statusBayar, transaksi)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <span>DIBAYAR:</span>
+        <span>${formatRupiah(pay.dibayar)}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-weight: bold;">
+        <span>SISA TAGIHAN:</span>
+        <span>${formatRupiah(pay.sisa)}</span>
       </div>
       <div class="line"></div>
       <div class="text-center" style="font-size: 10px;">
         * Foto kondisi pakaian tersimpan dalam sistem kami.<br>
         * Pengambilan wajib menunjukkan nota / pesan WhatsApp.<br>
+        ${settings.syarat ? `* ${settings.syarat}<br>` : ""}
         Terima Kasih Atas Kepercayaan Anda!
       </div>
     </body>

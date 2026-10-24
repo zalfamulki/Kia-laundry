@@ -30,6 +30,21 @@ async function loadSettingsForm() {
   document.getElementById("cfgHp1").value = appSettings.noHp1 || "085179591769";
   document.getElementById("cfgHp2").value = appSettings.noHp2 || "08112291769";
 
+  // Task 4 — kasir, syarat nota, & template WhatsApp
+  const cfgKasir = document.getElementById("cfgKasir");
+  if (cfgKasir) cfgKasir.value = appSettings.kasir || "Kasir KIA Laundry";
+
+  const cfgSyarat = document.getElementById("cfgSyarat");
+  if (cfgSyarat) cfgSyarat.value = appSettings.syarat || DEFAULT_SYARAT;
+
+  const cfgWaMasuk = document.getElementById("cfgWaTemplateMasuk");
+  if (cfgWaMasuk) cfgWaMasuk.value = appSettings.waTemplateMasuk || DEFAULT_WA_TEMPLATES.masuk;
+
+  const cfgWaSiap = document.getElementById("cfgWaTemplateSiap");
+  if (cfgWaSiap) cfgWaSiap.value = appSettings.waTemplateSiap || DEFAULT_WA_TEMPLATES.siap;
+
+  renderWaPlaceholderList();
+
   // 2. Batas Purge Foto Otomatis (Task 2.2)
   const cfgPurge = document.getElementById("cfgBatasPurgeHari");
   if (cfgPurge) cfgPurge.value = appSettings.batasPurgeHari ?? 90;
@@ -66,12 +81,19 @@ function setupSettingsEvents() {
       e.preventDefault();
 
       const updated = {
+        ...appSettings,
         id: "app",
         namaLaundry: document.getElementById("cfgNamaLaundry").value.trim(),
         slogan: document.getElementById("cfgSlogan").value.trim(),
         alamat: document.getElementById("cfgAlamat").value.trim(),
         noHp1: document.getElementById("cfgHp1").value.trim(),
         noHp2: document.getElementById("cfgHp2").value.trim(),
+        kasir: document.getElementById("cfgKasir")?.value.trim() || "Kasir KIA Laundry",
+        syarat: document.getElementById("cfgSyarat")?.value.trim() || DEFAULT_SYARAT,
+        waTemplateMasuk:
+          document.getElementById("cfgWaTemplateMasuk")?.value || DEFAULT_WA_TEMPLATES.masuk,
+        waTemplateSiap:
+          document.getElementById("cfgWaTemplateSiap")?.value || DEFAULT_WA_TEMPLATES.siap,
         logo: appSettings.logo || "./assets/logo.png",
         batasPurgeHari: Number(document.getElementById("cfgBatasPurgeHari")?.value) || 90,
         harga: {
@@ -99,8 +121,11 @@ function setupSettingsEvents() {
       ModeManager.setPreference(selectedMode);
 
       showToast("Pengaturan identitas dan daftar harga berhasil disimpan!", "success");
+      appSettings = updated;
     });
   }
+
+  setupWaTemplateEditor();
 
   // Tombol Hapus Semua Data
   const btnResetData = document.getElementById("btnResetData");
@@ -116,6 +141,93 @@ function setupSettingsEvents() {
       } else if (confirmWord !== null) {
         showToast("Konfirmasi dibatalkan. Kata yang Anda ketik tidak cocok.", "warning");
       }
+    });
+  }
+}
+
+// ============================================================
+// Task 4 — Editor template WhatsApp (2 tahap)
+// ============================================================
+
+function renderWaPlaceholderList() {
+  const host = document.getElementById("waPlaceholderList");
+  if (!host || typeof WA_PLACEHOLDERS === "undefined") return;
+
+  host.innerHTML = WA_PLACEHOLDERS.map(
+    (p) =>
+      `<span class="wa-placeholder-chip"><code>{${escapeHtml(p.key)}}</code>${escapeHtml(p.label)}</span>`
+  ).join("");
+}
+
+function getWaFormSettings() {
+  return {
+    namaLaundry: document.getElementById("cfgNamaLaundry")?.value.trim() || "KIA Laundry",
+    slogan: document.getElementById("cfgSlogan")?.value.trim() || "Clean & Fresh",
+    alamat: document.getElementById("cfgAlamat")?.value.trim() || "",
+    noHp1: document.getElementById("cfgHp1")?.value.trim() || "",
+    noHp2: document.getElementById("cfgHp2")?.value.trim() || "",
+    kasir: document.getElementById("cfgKasir")?.value.trim() || "Kasir KIA Laundry",
+    syarat: document.getElementById("cfgSyarat")?.value.trim() || DEFAULT_SYARAT,
+    waTemplateMasuk: document.getElementById("cfgWaTemplateMasuk")?.value || "",
+    waTemplateSiap: document.getElementById("cfgWaTemplateSiap")?.value || ""
+  };
+}
+
+function showWaPreview(stage) {
+  const box = document.getElementById("waPreviewBox");
+  const title = document.getElementById("waPreviewTitle");
+  const text = document.getElementById("waPreviewText");
+  if (!box || !title || !text) return;
+
+  const settings = getWaFormSettings();
+  const template = stage === "masuk" ? settings.waTemplateMasuk : settings.waTemplateSiap;
+
+  if (!template.trim()) {
+    showToast("Template masih kosong. Isi pesan atau reset ke default.", "warning");
+    return;
+  }
+
+  const data = getWaPreviewData(settings);
+  title.textContent =
+    stage === "masuk" ? "Pratinjau Tahap 1 — Cucian Masuk" : "Pratinjau Tahap 2 — Cucian Siap";
+  text.textContent = renderWaTemplate(template, data).trim();
+  box.hidden = false;
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function setupWaTemplateEditor() {
+  const cfgMasuk = document.getElementById("cfgWaTemplateMasuk");
+  const cfgSiap = document.getElementById("cfgWaTemplateSiap");
+
+  const btnPreviewMasuk = document.getElementById("btnPreviewWaMasuk");
+  const btnPreviewSiap = document.getElementById("btnPreviewWaSiap");
+  const btnResetMasuk = document.getElementById("btnResetWaMasuk");
+  const btnResetSiap = document.getElementById("btnResetWaSiap");
+  const btnClose = document.getElementById("btnCloseWaPreview");
+
+  if (btnPreviewMasuk) btnPreviewMasuk.addEventListener("click", () => showWaPreview("masuk"));
+  if (btnPreviewSiap) btnPreviewSiap.addEventListener("click", () => showWaPreview("siap"));
+
+  if (btnResetMasuk && cfgMasuk) {
+    btnResetMasuk.addEventListener("click", () => {
+      if (!confirm("Kembalikan template Tahap 1 ke teks default?")) return;
+      cfgMasuk.value = DEFAULT_WA_TEMPLATES.masuk;
+      showToast("Template Tahap 1 dikembalikan ke default. Klik Simpan untuk menerapkan.", "info");
+    });
+  }
+
+  if (btnResetSiap && cfgSiap) {
+    btnResetSiap.addEventListener("click", () => {
+      if (!confirm("Kembalikan template Tahap 2 ke teks default?")) return;
+      cfgSiap.value = DEFAULT_WA_TEMPLATES.siap;
+      showToast("Template Tahap 2 dikembalikan ke default. Klik Simpan untuk menerapkan.", "info");
+    });
+  }
+
+  if (btnClose) {
+    btnClose.addEventListener("click", () => {
+      const box = document.getElementById("waPreviewBox");
+      if (box) box.hidden = true;
     });
   }
 }

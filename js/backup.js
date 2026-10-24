@@ -205,10 +205,20 @@ class BackupManager {
       }
     }
 
+    // Task 4 — hitung ulang statistik customer agar counter setelah restore akurat
+    let customerCount = parsed.data.customer?.length || 0;
+    if (typeof recalcAllCustomerStats === "function") {
+      try {
+        customerCount = await recalcAllCustomerStats();
+      } catch (err) {
+        console.warn("Gagal rekalkulasi customer setelah restore:", err);
+      }
+    }
+
     return {
       transaksiCount: parsed.data.transaksi?.length || 0,
       pakaianCount: parsed.data.pakaian?.length || 0,
-      customerCount: parsed.data.customer?.length || 0
+      customerCount
     };
   }
 

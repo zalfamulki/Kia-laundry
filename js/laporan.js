@@ -12,6 +12,7 @@ let filteredPkn = [];
 let pknByTrx = new Map();
 let defaultFilterDates = { start: "", end: "" };
 let activeFotoNota = [];
+let laporanSettings = {};
 
 document.addEventListener("DOMContentLoaded", async () => {
   renderNav("laporan");
@@ -49,6 +50,7 @@ function setupDefaultFilterDates() {
 async function loadLaporanData() {
   masterTrx = (await db.transaksi.toArray()).filter((t) => !t.deletedAt);
   masterPkn = await db.pakaian.toArray();
+  laporanSettings = (await db.pengaturan.get("app")) || {};
 
   await updateTrashBadge();
   applyLaporanFilters();
@@ -123,9 +125,11 @@ function updateLaporanSummary() {
   const countPcs = filteredPkn.reduce((sum, p) => sum + (Number(p.jumlah) || 1), 0);
   const totalOmzet = filteredTrx.reduce((sum, t) => sum + (Number(t.totalHarga) || 0), 0);
 
-  const belumBayar = filteredTrx
-    .filter((t) => t.statusBayar === "belum")
-    .reduce((sum, t) => sum + (Number(t.totalHarga) || 0), 0);
+  // Task 4 — piutang dihitung dari sisa tagihan sebenarnya (DP ikut diperhitungkan)
+  const belumBayar = filteredTrx.reduce((sum, t) => {
+    if (typeof getSisaTagihan === "function") return sum + getSisaTagihan(t);
+    return sum + (t.statusBayar === "lunas" ? 0 : Number(t.totalHarga) || 0);
+  }, 0);
 
   const elCountTrx = document.getElementById("sumCountTrx");
   const elCountPcs = document.getElementById("sumCountPcs");
@@ -235,6 +239,7 @@ async function markTransaksiLunas(trxId) {
   try {
     await db.transaksi.update(trxId, {
       statusBayar: "lunas",
+      jumlahDibayar: Number(trx.totalHarga) || 0,
       updatedAt: new Date().toISOString()
     });
     showToast(`Pembayaran ${trxId} berhasil ditandai lunas.`, "success");
@@ -280,6 +285,16 @@ function openEditTransaksi(trxId) {
     )
     .join("");
 
+  const payInfo =
+    typeof getPaymentInfo === "function"
+      ? getPaymentInfo(trx)
+      : {
+          total: Number(trx.totalHarga) || 0,
+          dibayar: Number(trx.jumlahDibayar) || 0,
+          sisa: 0,
+          statusBayar: trx.statusBayar || "belum"
+        };
+
   const contentHtml = `
     <div class="edit-trx-info">
       <div><span>No. Nota</span><strong>${escapeHtml(trx.id)}</strong></div>
@@ -304,6 +319,12 @@ function openEditTransaksi(trxId) {
       </div>
 
       <div class="form-group">
+        <label class="form-label" for="editTrxJumlahDibayar">Jumlah Dibayar (Rp)</label>
+        <input type="number" id="editTrxJumlahDibayar" class="form-control" min="0" step="500" value="${payInfo.dibayar}">
+        <div class="form-help">Belum Bayar = 0, Lunas = total penuh. Isi nominal untuk DP; sisa dihitung otomatis.</div>
+      </div>
+
+      <div class="form-group">
         <label class="form-label" for="editTrxCatatan">Catatan</label>
         <input type="text" id="editTrxCatatan" class="form-control" maxlength="500" value="${escapeHtml(trx.catatan || "")}" placeholder="Catatan transaksi (opsional)">
       </div>
@@ -311,6 +332,7 @@ function openEditTransaksi(trxId) {
 
     <p class="form-help" style="margin-top:0.75rem;">
       Perubahan status di sini adalah koreksi admin. Perubahan status pembayaran tidak mengubah total belanja customer.
+      Sisa tagihan saat ini: <strong>${formatRupiah(payInfo.sisa)}</strong>.
     </p>
   `;
 
@@ -325,6 +347,7 @@ function openEditTransaksi(trxId) {
           const status = document.getElementById("editTrxStatus")?.value;
           const statusBayar = document.getElementById("editTrxStatusBayar")?.value;
           const totalHarga = Number(document.getElementById("editTrxTotal")?.value);
+          const jumlahDibayar = Number(document.getElementById("editTrxJumlahDibayar")?.value) || 0;
           const catatan = document.getElementById("editTrxCatatan")?.value.trim() || "";
 
           if (!statusOptions.some(([value]) => value === status)) {
@@ -348,9 +371,11 @@ function openEditTransaksi(trxId) {
           }
 
           const now = new Date().toISOString();
+          const payment = normalizePayment(statusBayar, totalHarga, jumlahDibayar);
           const changes = {
             status,
-            statusBayar,
+            statusBayar: payment.statusBayar,
+            jumlahDibayar: payment.jumlahDibayar,
             totalHarga,
             catatan,
             updatedAt: now
@@ -362,9 +387,9 @@ function openEditTransaksi(trxId) {
 
           try {
             await db.transaksi.update(trxId, changes);
+            close();
             await recalcCustomerStats(trx.noHp);
             await loadLaporanData();
-            close();
             showToast(`Transaksi ${trxId} berhasil diperbarui.`, "success");
           } catch (err) {
             console.error("Gagal memperbarui transaksi:", err);
@@ -377,7 +402,34 @@ function openEditTransaksi(trxId) {
         className: "btn-outline",
         onClick: (close) => close()
       }
-    ]
+    ],
+    {
+      size: "md",
+      onOpen: () => {
+        const statusEl = document.getElementById("editTrxStatusBayar");
+        const paidEl = document.getElementById("editTrxJumlahDibayar");
+        const totalEl = document.getElementById("editTrxTotal");
+        if (!statusEl || !paidEl || !totalEl) return;
+
+        const syncFromStatus = () => {
+          const total = Number(totalEl.value) || 0;
+          if (statusEl.value === "lunas") paidEl.value = total;
+          else if (statusEl.value === "belum") paidEl.value = 0;
+        };
+
+        const syncFromPaid = () => {
+          const total = Number(totalEl.value) || 0;
+          const paid = Math.max(0, Number(paidEl.value) || 0);
+          if (total > 0 && paid >= total) statusEl.value = "lunas";
+          else if (paid > 0) statusEl.value = "dp";
+          else statusEl.value = "belum";
+        };
+
+        statusEl.addEventListener("change", syncFromStatus);
+        paidEl.addEventListener("input", syncFromPaid);
+        totalEl.addEventListener("input", syncFromStatus);
+      }
+    }
   );
 }
 
@@ -684,9 +736,12 @@ function openEditPakaian(pknId) {
             await db.pakaian.update(pknId, changes);
             await db.transaksi.update(p.transaksiId, { updatedAt: new Date().toISOString() });
 
-            await loadLaporanData();
+            // Tutup modal edit dan langsung tampilkan lagi modal foto dengan data terbaru
             close();
+            Object.assign(p, changes);
             openFotoNota(p.transaksiId);
+
+            await loadLaporanData();
             showToast("Data pakaian berhasil diperbarui.", "success");
           } catch (err) {
             console.error("Gagal memperbarui pakaian:", err);
@@ -747,11 +802,22 @@ async function deletePakaianItem(pknId) {
 }
 
 function buildWhatsAppUrl(trx) {
-  const phone = String(trx.noHp || "").replace(/\D/g, "").replace(/^0/, "");
+  const items = pknByTrx.get(trx.id) || masterPkn.filter((p) => p.transaksiId === trx.id);
+
+  if (typeof buildWaUrl === "function") {
+    // Tahap 1 untuk cucian yang baru masuk; tahap 2 untuk yang sudah diproses.
+    const stage = (trx.status || "masuk") === "masuk" ? "masuk" : "siap";
+    return buildWaUrl(stage, trx, laporanSettings, items);
+  }
+
+  const phone =
+    typeof normalizeWhatsAppPhone === "function"
+      ? normalizeWhatsAppPhone(trx.noHp)
+      : String(trx.noHp || "").replace(/\D/g, "").replace(/^0/, "62");
   if (!phone) return "";
 
   const text = `Halo Kak ${trx.namaCustomer || ""}, kami dari KIA Laundry terkait cucian Anda dengan No. Nota ${trx.id}.`;
-  return `https://wa.me/62${phone}?text=${encodeURIComponent(text)}`;
+  return `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
 }
 
 function openFotoLightbox(index) {
@@ -970,102 +1036,73 @@ function setupLaporanEventListeners() {
   }
 
   // ======================================================
-  // Task 2.1 — Tombol "Export & Bersihkan"
-  // Setelah export ZIP sukses, tawarkan opsi hapus foto nota yang diarsipkan
+  // Task 4 — Export Laporan Keuangan (Excel, kapan saja)
+  // Mengikuti filter aktif; tidak menghapus data/foto apa pun.
   // ======================================================
-  const btnExportBersihkan = document.getElementById("btnExportBersihkan");
-  if (btnExportBersihkan) {
-    btnExportBersihkan.addEventListener("click", async () => {
-      const trxDenganFoto = filteredTrx.filter((t) => {
-        const items = pknByTrx.get(t.id) || [];
-        return items.some(hasFoto);
-      });
-
-      if (trxDenganFoto.length === 0) {
-        showToast("Tidak ada nota dengan foto dalam periode filter ini.", "warning");
+  const btnExportLaporanKeuangan = document.getElementById("btnExportLaporanKeuangan");
+  if (btnExportLaporanKeuangan) {
+    btnExportLaporanKeuangan.addEventListener("click", async () => {
+      if (filteredTrx.length === 0) {
+        showToast("Tidak ada data pada filter aktif untuk diekspor.", "warning");
         return;
       }
 
-      // Hitung estimasi foto dan MB yang akan dihapus
-      let totalFoto = 0;
-      let totalBytes = 0;
+      const startVal = document.getElementById("filterDateStart")?.value || "";
+      const endVal = document.getElementById("filterDateEnd")?.value || "";
+      const statusVal = document.getElementById("filterStatusLaporan")?.value || "all";
+      const bayarVal = document.getElementById("filterBayarLaporan")?.value || "all";
+      const layananVal = document.getElementById("filterLayananLaporan")?.value || "all";
 
-      for (const t of trxDenganFoto) {
-        const items = pknByTrx.get(t.id) || [];
-        for (const p of items) {
-          if (p.foto) {
-            totalFoto++;
-            totalBytes += Math.round(p.foto.length * 0.75);
-          }
-          if (p.fotoThumb) {
-            totalBytes += Math.round(p.fotoThumb.length * 0.75);
-          }
-        }
+      const statusLabels = {
+        all: "Semua status",
+        masuk: "Masuk",
+        dicuci: "Dicuci",
+        disetrika: "Disetrika",
+        siap: "Siap Antar/Ambil",
+        diambil: "Sudah Diambil"
+      };
+      const bayarLabels = {
+        all: "Semua status",
+        lunas: "Lunas",
+        dp: "DP",
+        belum: "Belum Bayar"
+      };
+      const layananLabels = {
+        all: "Semua layanan",
+        cuci: "Cuci",
+        setrika: "Setrika",
+        "cuci-setrika": "Cuci + Setrika",
+        satuan: "Satuan"
+      };
+
+      const periodeText =
+        startVal || endVal
+          ? `${startVal || "awal"} s/d ${endVal || "sekarang"}`
+          : "Semua data";
+
+      try {
+        btnExportLaporanKeuangan.disabled = true;
+        showToast("Menyusun laporan keuangan Excel...", "info");
+
+        const result = await ExportManager.exportLaporanKeuangan(filteredTrx, filteredPkn, {
+          start: startVal,
+          end: endVal,
+          periodeText,
+          filterStatus: statusLabels[statusVal] || statusVal,
+          filterBayar: bayarLabels[bayarVal] || bayarVal,
+          filterLayanan: layananLabels[layananVal] || layananVal
+        });
+
+        showToast(
+          `Laporan keuangan diunduh: ${result.transaksi} transaksi, omzet ${formatRupiah(result.omzet)}, sisa ${formatRupiah(result.sisa)}.`,
+          "success"
+        );
+      } catch (err) {
+        console.error("Gagal export laporan keuangan:", err);
+        showToast("Gagal export laporan keuangan: " + err.message, "error");
+      } finally {
+        btnExportLaporanKeuangan.disabled = false;
       }
-
-      const estimasiMb = (totalBytes / (1024 * 1024)).toFixed(2);
-      const trxIds = trxDenganFoto.map((t) => t.id);
-
-      // Tampilkan dialog konfirmasi ringkasan
-      const ringkasanHtml = `
-        <div style="text-align:center; padding: 0.5rem 0 1rem;">
-          <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">🗑️</div>
-          <p style="font-size: 1rem; color: var(--text-body); margin-bottom: 1.25rem;">
-            Fitur ini akan <strong>menghapus foto pakaian</strong> dari <strong>${trxIds.length} nota</strong>
-            dalam periode filter yang aktif saat ini.
-          </p>
-          <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.25rem;">
-            <div style="background: #fef3c7; border: 1px solid #fde68a; border-radius: 10px; padding: 0.75rem 1.5rem; text-align:center;">
-              <div style="font-size: 1.75rem; font-weight: 900; color: #92400e;">${totalFoto}</div>
-              <div style="font-size: 0.8rem; color: #78350f;">Foto akan dihapus</div>
-            </div>
-            <div style="background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 10px; padding: 0.75rem 1.5rem; text-align:center;">
-              <div style="font-size: 1.75rem; font-weight: 900; color: #14532d;">~${estimasiMb} MB</div>
-              <div style="font-size: 0.8rem; color: #166534;">Estimasi dibebaskan</div>
-            </div>
-          </div>
-          <div style="background: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px; padding: 0.875rem; font-size: 0.85rem; color: #9a3412; text-align:left; line-height:1.5;">
-            ⚠️ <strong>Data teks transaksi dan pakaian tetap tersimpan.</strong><br>
-            Hanya file foto yang dihapus dari penyimpanan browser.<br>
-            Pastikan Anda sudah mengunduh ZIP sebelum melanjutkan.
-          </div>
-        </div>
-      `;
-
-      showModal(
-        "Konfirmasi Hapus Foto Nota",
-        ringkasanHtml,
-        [
-          {
-            label: "Ya, Hapus Foto Sekarang",
-            className: "btn-danger",
-            onClick: async (close) => {
-              try {
-                btnExportBersihkan.disabled = true;
-                showToast("Menghapus foto dari penyimpanan...", "info");
-                const result = await purgeFotoNota(trxIds);
-                showToast(
-                  `Berhasil membebaskan ${result.estimasiMb} MB — ${result.fotoCount} foto dihapus dari ${trxIds.length} nota.`,
-                  "success"
-                );
-                await loadLaporanData();
-                close();
-              } catch (err) {
-                console.error("Gagal purge foto:", err);
-                showToast("Gagal menghapus foto: " + err.message, "error");
-              } finally {
-                btnExportBersihkan.disabled = false;
-              }
-            }
-          },
-          {
-            label: "Batal",
-            className: "btn-outline",
-            onClick: (close) => close()
-          }
-        ],
-        { size: "md" }
-      );
     });
   }
 }
